@@ -1,0 +1,4 @@
+name = "Hackathon Submission"
+description = "Hackathon Submission"
+package = "FOSSEE"
+core = "7.x"
