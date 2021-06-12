@@ -819,6 +819,10 @@ fclose($myfile);
 
 chdir("esim_uploads/hackathon_submission_uploads");
 chdir("latex");
+
+//$sh_command = "./pdf_creator.sh " . $fn . " " . $ref_fn;
+
+
 $latex_file = shell_exec('pdflatex ' . $fn . '');
 $ref_fn = $submission_data->id . "_literature_survey_report.aux";
 $bibtex = shell_exec('bibtex ' . $ref_fn . '');
@@ -827,9 +831,14 @@ $bibtex = shell_exec('bibtex ' . $ref_fn . '');
 /*$latex_file = shell_exec('latex ' . $fn . '');
 $latex_file = shell_exec('latex ' . $fn . '');
 */$pdflatex = shell_exec('pdflatex ' .$fn .'' );
+/*
+
+
+"./pdf_creator.sh " . $fn . " " . $ref_fn;
+    exec($sh_command);*/
 /*$sh_command = "./pdf_creator.sh " . $fn . " " . $circuit_ref_files_filename . " " . $pdf_filename;
     exec($sh_command);*/
-/*if (filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf") == TRUE)
+if (filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf") == TRUE)
         {
             ob_clean();
             header("Pragma: public");
@@ -852,56 +861,7 @@ $latex_file = shell_exec('latex ' . $fn . '');
         {
             drupal_set_message("Error occurred when generating the PDF version of the report.", 'error');
             drupal_goto('');
-        }*/
-
-
-// return $
-    /**************************** WRITE TO FILES ********************************/
-    /*$download_filename = $submission_data->circuit_name . "_" . $submission_data->participant_name;
-    $circuit_details_filename = "tmp_" . $submission_data->id . "_circuit_details.txt";
-    $circuit_ref_files_filename = "tmp_" . $submission_data->id . "_circuit_ref_files.txt";
-    $pdf_filename = "report_" . $submission_data->id . ".pdf";
-    // $book_filedata = str_replace("&", "\&", $book_filedata);
-    $fb = fopen($dir_path . $circuit_details_filename, 'w');
-    fwrite($fb, $submission_circuit_filedata);
-    fclose($fb);
-    // $contributor_filedata = str_replace("&", "\&", $contributor_filedata);
-    $fc = fopen($dir_path . $circuit_ref_files_filename, 'w');
-    fwrite($fc, $reference_filedata);
-    fclose($fc);*/
-    //var_dump($dir_path . "book_" . $preference_data->id . ".pdf");die;
-    /*if (_latex_run_script($circuit_details_filename, $circuit_ref_files_filename, $pdf_filename))
-    {
-        // download PDF file 
-        if (filesize($dir_path . $pdf_filename) == TRUE)
-        {
-            ob_clean();
-            header("Pragma: public");
-            header("Expires: 0");
-            header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-            header("Cache-Control: public");
-            header("Content-Description: File Transfer");
-            header('Content-Type: application/pdf');
-            header('Content-disposition: attachment; filename="' . $submission_data->circuit_name . '_' . $submission_data->participant_name . '.pdf"');
-            header('Content-Length: ' . filesize($dir_path . $pdf_filename));
-            header("Content-Transfer-Encoding: binary");
-            header('Expires: 0');
-            header('Pragma: no-cache');
-            @readfile($dir_path . $pdf_filename);
-            ob_end_flush();
-            ob_clean();
-            flush();
-        } //filesize($dir_path . $pdf_filename) == TRUE
-        else
-        {
-            drupal_set_message("Error occurred when generating the PDF version of the report.", 'error');
-            drupal_goto('');
         }
-    } //_latex_run_script($book_filename, $contributor_filename, $latex_filename, $latex_dep_filename, $pdf_filename)
-    else
-    {
-        drupal_set_message("Error occurred when generating the PDF version of the Book.", 'error');
-    }*/
     
 }
 

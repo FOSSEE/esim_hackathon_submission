@@ -1,5 +1,5 @@
 <?php
-/*function download_literature_survey_report()
+function download_literature_survey_report()
 {
 	$submission_id = arg(3);
 	// drupal_set_message('This feature is currently unavailabe. We will resumes it shorty.','error');
@@ -11,9 +11,9 @@
 	if ($full_book == "1")
 		_latex_generate_files($submission_id, TRUE);
 	else
-		_latex_generate_files($submission_id, FALSE);
-}*/
-function download_literature_survey_report()
+		_latex_generate_files($submission_id, FALSE);*/
+}
+/*function download_literature_survey_report()
 {
 	$submission_id = arg(3);
 	$root_path = hackathon_submission_files_path();
@@ -44,7 +44,23 @@ function download_literature_survey_report()
 		} //filesize($dir_path . $pdf_filename) == TRUE
 		else
 		{
-			drupal_set_message("Error occurred when generating the PDF version of the report.", 'error');
-			drupal_goto('');
+			_latex_generate_files($submission_data->id);
+			ob_clean();
+			header("Pragma: public");
+			header("Expires: 0");
+			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+			header("Cache-Control: public");
+			header("Content-Description: File Transfer");
+			header('Content-Type: application/pdf');
+			header('Content-disposition: attachment; filename="' . $submission_data->id . "_literature_survey_report.pdf'");
+			header('Content-Length: ' . filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf"));
+			header("Content-Transfer-Encoding: binary");
+			header('Expires: 0');
+			header('Pragma: no-cache');
+			@readfile($dir_path . $submission_data->id . "_literature_survey_report.pdf");
+			ob_end_flush();
+			ob_clean();
+			flush();
+
 		}
-}
+}*/

@@ -435,7 +435,7 @@ function literature_report_submission_form_submit($form, &$form_state){
 
         }
     }
-    _latex_generate_files($submission_id);
+    //_latex_generate_files($submission_id);
         if (!$submission_id)
         {
             drupal_set_message(t('Error receiving your submission. Please try again.'), 'error');
