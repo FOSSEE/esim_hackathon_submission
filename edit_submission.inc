@@ -374,7 +374,7 @@ function edit_literature_report_submission_form_submit($form, $form_state){
             for ($i = 0; $i <= $v["bib_reference_count"]; $i++) {
                 //$f_id=$v['bib_reference_fieldset'][$i]["f_id"];
                 if ($v['bib_reference_fieldset'][$i]["resource_link"] != "") {
-                    $bib_referencequery = "UPDATE set hackathon_literature_survey_bib_references
+                    $bib_referencequery = "UPDATE hackathon_literature_survey_bib_references set
                     resource_link = :resource_link,
                     resource_title = :resource_title,
                     resource_author = :resource_author
