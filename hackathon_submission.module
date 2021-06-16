@@ -831,25 +831,12 @@ fclose($myfile);
 
 chdir("esim_uploads/hackathon_submission_uploads");
 chdir("latex");
-
-//$sh_command = "./pdf_creator.sh " . $fn . " " . $ref_fn;
-
-
-$latex_file = shell_exec('pdflatex ' . $fn . '');
 $ref_fn = $submission_data->id . "_literature_survey_report";
-$bibtex = shell_exec('bibtex ' . $ref_fn . '');
 
-//var_dump($bibtex);die;
-/*$latex_file = shell_exec('latex ' . $fn . '');
-$latex_file = shell_exec('latex ' . $fn . '');
-*/$pdflatex = shell_exec('pdflatex ' .$fn .'' );
-/*
+$sh_command = "/bin/bash pdf_creator.sh " . $fn . " " . $ref_fn;
+exec($sh_command);
 
 
-"./pdf_creator.sh " . $fn . " " . $ref_fn;
-    exec($sh_command);*/
-/*$sh_command = "./pdf_creator.sh " . $fn . " " . $circuit_ref_files_filename . " " . $pdf_filename;
-    exec($sh_command);*/
 if (filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf") == TRUE)
         {
             ob_clean();
