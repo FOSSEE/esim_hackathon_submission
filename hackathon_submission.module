@@ -90,16 +90,28 @@ $items["hackathon-submission/descriptioninfo"] = array(
         "type" => MENU_CALLBACK
     );
     $items["hackathon-submission/add/literature-report"] = array(
-        "title" => "Literature Survey Report Form",
+        "title" => "CSMD submission",
         "page callback" => 'drupal_get_form',
         'page arguments' => array(
-            'literature_report_submission_form'
+            'add_literature_report_submission_form'
         ),
         "access arguments" => array(
             "add hackathon_submission"
         ),
         "type" => MENU_CALLBACK,
         'file' => 'add_submission.inc'
+    );
+    $items["hackathon-submission/edit/literature-report"] = array(
+        "title" => "Edit CSMD submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_literature_report_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
     );
 	$items["hackathon-submission/your-upload"] = array(
         "title" => "LIST OF FILES UPLOADED BY USER",
@@ -236,7 +248,7 @@ function hackathon_submission_display_my_submissions()
         else if($my_proposals_data->approval_status == 0){
             $action = 'Proposal pending for review';
         }*/
-        $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id);
+        $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id) . ' | ' . l('Edit', 'hackathon-submission/edit/literature-report/' . $my_proposals_data->id);
         $my_proposal_rows[$my_proposals_data->id] = array(
             date('d-m-Y', $my_proposals_data->creation_date),
             l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
@@ -737,7 +749,7 @@ function _latex_generate_files($submission_id)
     /********************* Write to tex file ***********************/
     $bibscript = '';
     while($bib_ref_data = $bib_references_q->fetchObject()){
-    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={ ' . $bib_ref_data->resource_author . '}, title={' . $bib_ref_data->resource_title . '}, year={' . $bib_ref_data->resource_link . '}}' . $eol;
+    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={ ' . $bib_ref_data->resource_author . '}, title={' . $bib_ref_data->resource_title . '}, howpublished={' . $bib_ref_data->resource_link . '}}' . $eol;
 }
 
 
@@ -754,7 +766,7 @@ fclose($bib_file);
 %   Fill in details where prompted
 %
 %% Language and font encodings
-\usepackage[spanish,english]{babel}
+\usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
@@ -766,8 +778,8 @@ fclose($bib_file);
 \usepackage{graphicx}
 %\usepackage[backend=bibtex]{biblatex}
 %\usepackage{ieee}
-\usepackage[colorinlistoftodos]{todonotes}
-\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+%\usepackage[colorinlistoftodos]{todonotes}
+%\usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
 \title{ ' . $submission_data->circuit_name . ' }
 
@@ -824,7 +836,7 @@ chdir("latex");
 
 
 $latex_file = shell_exec('pdflatex ' . $fn . '');
-$ref_fn = $submission_data->id . "_literature_survey_report.aux";
+$ref_fn = $submission_data->id . "_literature_survey_report";
 $bibtex = shell_exec('bibtex ' . $ref_fn . '');
 
 //var_dump($bibtex);die;

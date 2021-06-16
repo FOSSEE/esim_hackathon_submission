@@ -1,11 +1,11 @@
 <?php
 
-function add_literature_report_submission_form($form, $form_state, $no_js_use = FALSE)
-{
+function edit_literature_report_submission_form($form, $form_state, $no_js_use = FALSE){
     global $user;
+    $submission_id = arg(3);
     if ($user->uid == 0)
     {
-        $msg = drupal_set_message(t('It is mandatory to log in on this website to upload your submission. If you are new user please create a new account first.'), 'error');
+        $msg = drupal_set_message(t('It is mandatory to log in on this website to edit your submission. If you are new user please create a new account first.'), 'error');
         //drupal_goto('esim-circuit-simulation-project');
         drupal_goto('user/login', array('query' => drupal_get_destination()));
         return $msg;
@@ -13,39 +13,35 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
     $query = db_select('hackathon_literature_survey');
     $query->fields('hackathon_literature_survey');
     $query->condition('uid', $user->uid);
-    $query->orderBy('id', 'DESC');
-    $query->range(0, 1);
-    $proposal_q = $query->execute();
-    $proposal_data = $proposal_q->fetchObject();
-    if ($proposal_data)
-    {
-         drupal_set_message(t('We have already received your submission. Use the edit submission below to make changes to your submission'), 'status');
-            drupal_goto('hackathon-submission/proposed');
-            return;
-         //$proposal_data->approval_status == 0 || $proposal_data->approval_status == 1
-    }//$proposal_data
+    $query->condition('id', $submission_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $submission_data = $submission_q->fetchObject();
     $form = array();
     $form['participant_name'] = array(
-    	'#title' => t('Participant Name'),
-    	'#type' => 'textfield',
-    	'#size' => 70,
-    	'#maxlength' => 70,
-        '#required' => TRUE
+        '#title' => t('Participant Name'),
+        '#type' => 'textfield',
+        '#disabled' => TRUE,
+        '#size' => 70,
+        '#maxlength' => 70,
+        '#default_value' => $submission_data->participant_name
     );
     $form['participant_email'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Email'),
-		'#size' => 30,
-		'#value' => $user->mail,
-		'#disabled' => TRUE
-	);
-	$form['institute'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Name of the college/institute'),
-		'#size' => 70,
-		'#maxlength' => 70,
-		'#required' => TRUE,
-	);
+        '#type' => 'textfield',
+        '#title' => t('Email'),
+        '#size' => 30,
+        '#value' => $user->mail,
+        '#disabled' => TRUE
+    );
+    $form['institute'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name of the college/institute'),
+        '#disabled' => TRUE,
+        '#size' => 70,
+        '#maxlength' => 70,
+        '#required' => TRUE,
+        '#default_value' => $submission_data->institute
+    );
    /* $form['circuit'] = array(
         '#type' => 'fieldset',
         '#title' => t('Circuits'),
@@ -54,10 +50,12 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
     );*/
     $form['circuit_name'] = array(
         '#title' => t('Circuit Name'),
+        '#disabled' => TRUE,
         '#type' => 'textfield',
         '#size' => 70,
         '#maxlength' => 70,
-        '#required' => TRUE
+        '#required' => TRUE,
+        '#default_value' => $submission_data->circuit_name
     );
     $form['abstract'] = array(
         '#title' => t('Abstract'),
@@ -67,6 +65,7 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
         '#minlength' => 600,
         '#maxlength' => 725,
         '#required' => TRUE,
+        '#default_value' => $submission_data->abstract
         /*'#ajax' => array(
         'callback' => 'update_length_ajax_callback',
         'wrapper' => 'length-div',
@@ -74,14 +73,6 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
         'effect' => 'fade',
         ),*/
     );
-    /*$form['abstract_length'] = array(
-        '#type' => 'textfield',
-        '#default_value' => 0,
-        '#value' => isset($form_state['values']['abstract']) ? strlen(trim(preg_replace('/\s+/',' ', $form_state['values']['abstract']))) : 0,
-        '#prefix' => '<div id="length-div">',
-        '#suffix' => '</div>',
-        '#attributes' => array('readonly' => 'readonly'),
-    );*/
     $form['circuit_details'] = array(
         '#title' => t('Circuit Details'),
         '#type' => 'textarea',
@@ -89,14 +80,23 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
         '#rows' => 5,
         '#minlength' => 1334,
         '#maxlength' => 1600,
-        '#required' => TRUE
+        '#required' => TRUE,
+        '#default_value' => $submission_data->circuit_details
     );    
-	$form['reference_files'] = array(
+    $form['reference_files'] = array(
         '#type' => 'fieldset',
         '#title' => t('Upload Reference Files'),
         '#collapsible' => FALSE,
         '#collapsed' => FALSE
     );
+    //var_dump($submission_id);die;
+    $existing_uploaded_C_file = default_value_for_uploaded_reference_files("C", $submission_id);
+    //var_dump($existing_uploaded_C_file);die;
+    if (!$existing_uploaded_C_file)
+    {
+        $existing_uploaded_C_file = new stdClass();
+        $existing_uploaded_C_file->filename = "No file uploaded";
+    }
     $form['reference_files']['reference_circuit'] = array(
         '#type' => 'file',
         '#title' => t('Upload reference circuit'),
@@ -106,8 +106,14 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
                 // Pass the maximum file size in bytes
                 /*'file_validate_size' => array(5*1024*1024),*/
               ),
-        '#description' => t('Upload image(900x600 pixels) with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('reference_circuit_extensions', '') . '</span>'
+        '#description' => t('Upload image(900x600 pixels) with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File :</span> ') . $existing_uploaded_C_file->filename . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('reference_circuit_extensions', '') . '</span>'
     );
+    $existing_uploaded_W_file = default_value_for_uploaded_reference_files("W", $submission_id);
+    if (!$existing_uploaded_W_file)
+    {
+        $existing_uploaded_W_file = new stdClass();
+        $existing_uploaded_W_file->filename = "No file uploaded";
+    }
     $form['reference_files']['reference_waveform'] = array(
         '#type' => 'file',
         '#title' => t('Upload reference waveform'),
@@ -117,9 +123,50 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
                 // Pass the maximum file size in bytes
                 /*'file_validate_size' => array(5*1024*1024),*/
               ),
-        '#description' => t('Upload image(900x600 pixels) with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('reference_waveform_extensions', '') . '</span>'
+        '#description' => t('Upload image(900x600 pixels) with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File :</span> ') . $existing_uploaded_W_file->filename . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('reference_waveform_extensions', '') . '</span>'
     );
+    $query_bib_ref = db_select('hackathon_literature_survey_bib_references');
+    $query_bib_ref->fields('hackathon_literature_survey_bib_references');
+    $query_bib_ref->condition('submission_id', $submission_id);
+    $result_bib_ref = $query_bib_ref->execute();
+    $num_of_fellowresults = $result_bib_ref->rowCount();
+    //var_dump($num_of_bib_ref);die;
+    $form['existing_bib_reference_fieldset'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('References'),
+            '#tree' => TRUE,
+            '#prefix' => '<div id="existing_bib_reference-fieldset-wrapper">',
+            '#suffix' => '</div>'
+    ); 
 
+            while ($row_s = $result_bib_ref->fetchObject()) {
+
+                $temp = $i;
+                $form['existing_bib_reference_fieldset'][$i]["s_text"] = array(
+                    "#type" => "item",
+                    "#markup" => "<h4><label>Resource : " . ($temp + 1) . "</label></h4>"
+                );
+                $form['existing_bib_reference_fieldset'][$i]["id"] = array(
+                    "#type" => "hidden",
+                    "#default_value" => $row_s->id
+                );
+                $form['existing_bib_reference_fieldset'][$i]["resource_link"] = array(
+                    "#type" => "textfield",
+                    "#title" => "Resource Link",
+                    "#default_value" => $row_s->resource_link
+                );
+                $form['existing_bib_reference_fieldset'][$i]["resource_title"] = array(
+                    "#type" => "textfield",
+                    "#title" => "Resource Title",
+                    "#default_value" => $row_s->resource_title
+                );
+                $form['existing_bib_reference_fieldset'][$i]["resource_author"] = array(
+                    "#type" => "textfield",
+                    "#title" => "Resource Author",
+                    "#default_value" => $row_s->resource_author
+                );
+                $i++;
+            }
     $form['bib_reference_fieldset'] = array(
             '#type' => 'fieldset',
             '#title' => t('References'),
@@ -127,11 +174,11 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
             '#prefix' => '<div id="bib_reference-fieldset-wrapper">',
             '#suffix' => '</div>'
         );         
-            if (empty($form_state['num_bib_reference'])) {
+          /*  if (empty($form_state['num_bib_reference'])) {
                 $form_state['num_bib_reference'] = 1;
-            }
+            }*/
             $temp = 0;
-            for ($i = 0; $i < $form_state['num_bib_reference']; $i++) {
+            for ($i = $num_of_fellowresults; $i < 3; $i++) {
                 $temp = $i;
                 $form['bib_reference_fieldset'][$i]["s_text"] = array(
                     "#type" => "item",
@@ -141,19 +188,19 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
                     "#type" => "textfield",
                     "#title" => "Link to the resource",
                     "#default_value" => "",
-                    '#required' => TRUE
+                    
                 );
                 $form['bib_reference_fieldset'][$i]["resource_title"] = array(
                     "#type" => "textfield",
                     "#title" => "Resource Paper title",
                     "#default_value" => "",
-                    '#required' => TRUE
+                    
                 );
                 $form['bib_reference_fieldset'][$i]["resource_author"] = array(
                     "#type" => "textfield",
                     "#title" => "Author of the resource",
                     "#default_value" => "",
-                    '#required' => TRUE
+                    
                 );
                
             }
@@ -161,16 +208,16 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
                 "#type" => "hidden",
                 "#value" => $temp
             );
-            if($i <3){
+            /*if($i <3){
             $form['bib_reference_fieldset']['add_bib_reference'] = array(
                 '#type' => 'submit',
                 '#value' => t('Add more'),
                 '#limit_validation_errors' => array(),
                 '#submit' => array(
-                    'bib_reference_add_more_add_one'
+                    'edit_form_bib_reference_add_more_add_one'
                 ),
                 '#ajax' => array(
-                    'callback' => 'bib_reference_add_more_callback',
+                    'callback' => 'edit_form_bib_reference_add_more_callback',
                     'wrapper' => 'bib_reference-fieldset-wrapper'
                 )
             );
@@ -181,7 +228,7 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
                     '#value' => t('Remove'),
                     '#limit_validation_errors' => array(),
                     '#submit' => array(
-                        'bib_reference_add_more_remove_one'
+                        'edit_form_bib_reference_add_more_remove_one'
                     ),
                     '#ajax' => array(
                         'callback' => 'bib_reference_add_more_callback',
@@ -194,52 +241,49 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
                     unset($form['bib_reference_fieldset']['remove_bib_reference']['#ajax']);
                 }
                 unset($form['bib_reference_fieldset']['add_bib_reference']['#ajax']);
-            }
+            }*/
 
     $form["submit"] = array(
         "#type" => "submit",
-	'#weight' => '6',
+    '#weight' => '6',
         "#value" => "Submit"
     );
     return $form;
 }
-/*function update_length_ajax_callback($form, &$form_state)
-{
-    return $form['abstract_length'];
-}*/
-
-  function bib_reference_add_more_callback($form, $form_state) {
+/*function edit_form_bib_reference_add_more_callback($form, $form_state) {
     return $form['bib_reference_fieldset'];
 }
 
 
-function bib_reference_add_more_add_one($form, &$form_state) {
-
- if (!isset($form_state['num_bib_reference'])) {
+function edit_form_bib_reference_add_more_add_one($form, &$form_state) {
+	if (!isset($form_state['num_bib_reference'])) {
         $form_state['num_bib_reference'] = 0;
         $form_state['num_bib_reference']++;
     }
 
     $form_state['num_bib_reference']++;
     $form_state['rebuild'] = TRUE;
+    //$form_state['no_redirect'] = TRUE;
 }
 
-function bib_reference_add_more_remove_one($form, &$form_state) {
+
+function edit_form_bib_reference_add_more_remove_one($form, &$form_state) {
     if ($form_state['num_bib_reference'] > 1) {
         $form_state['num_bib_reference']--;
     }
     $form_state['rebuild'] = TRUE;
-}
+}*/
 
 
-function add_literature_report_submission_form_validate($form, &$form_state){
+
+function edit_literature_report_submission_form_validate($form, &$form_state){
     if (isset($_FILES['files']))
     {
         /* check if atleast one source or result file is uploaded */
-        if (!($_FILES['files']['name']['reference_circuit']))
+        /*if (!($_FILES['files']['name']['reference_circuit']))
             form_set_error('reference_circuit', t('Please upload the circuit diagram'));
         if(!($_FILES['files']['name']['reference_waveform']))
-            form_set_error('reference_waveform', t('Please upload the waveform'));
+            form_set_error('reference_waveform', t('Please upload the waveform'));*/
         /* check for valid filename extensions */
         foreach ($_FILES['files']['name'] as $file_form_name => $file_name)
         {
@@ -276,56 +320,38 @@ function add_literature_report_submission_form_validate($form, &$form_state){
     return $form_state;
 }
 
-function add_literature_report_submission_form_submit($form, &$form_state){
-    global $user;
-    $root_path = hackathon_submission_files_path();
-    $v = $form_state["values"];
-    $circuit_name = trim($v['circuit_name']);
-    $participant_name = trim($v['participant_name']);
-    $directory_name = _hs_dir_name($circuit_name, $participant_name);
-    $result = "INSERT INTO hackathon_literature_survey 
-    (
-    uid, 
-    participant_name,
-    participant_email,
-    institute,
-    circuit_name, 
-    abstract, 
-    circuit_details, 
-    directory_name,
-    creation_date
-    ) VALUES
-    (
-    :uid, 
-    :participant_name, 
-    :participant_email,
-    :institute, 
-    :circuit_name, 
-    :abstract, 
-    :circuit_details,
-    :directory_name,
-    :creation_date
-    )";
-    $args = array(
-        ":uid" => $user->uid,
-        ":participant_name" => $participant_name,
-        ":participant_email" => $v['participant_email'],
-        ":institute" => trim($v['institute']),
-        ":circuit_name" => $circuit_name,
-        ":abstract" => trim($v['abstract']),
-        ":circuit_details" => trim($v['circuit_details']),
-        ":directory_name" => $directory_name,
-        ":creation_date" => time()
-        );
-    //  var_dump($args);die;
-    //var_dump($result);die;
-    $submission_id = db_query($result, $args, array(
-        'return' => Database::RETURN_INSERT_ID
-    ));
-    //Adding references to db
 
+
+function edit_literature_report_submission_form_submit($form, $form_state){
+	$submission_id = arg(3);
+	global $user;
+	$v = $form_state['values'];
+	$root_path = hackathon_submission_files_path();
+	$query = "UPDATE hackathon_literature_survey SET 
+				abstract=:abstract,
+				circuit_details=:circuit_details
+				WHERE id=:submission_id";
+	$args = array(
+		':abstract' => $v['abstract'],
+		':circuit_details' => $v['circuit_details'],
+		':submission_id' => $submission_id
+	);
+	$result = db_query($query, $args);
+	/*$submission_id = db_query($query, $args, array(
+        'return' => Database::RETURN_INSERT_ID
+    ));*/
+    $query = db_select('hackathon_literature_survey');
+    $query->fields('hackathon_literature_survey');
+    $query->condition('uid', $user->uid);
+    $query->condition('id', $submission_id);
+    $query->range(0, 1);
+    $proposal_q = $query->execute();
+    $proposal_data = $proposal_q->fetchObject();
+    $proposal_dir_path = $proposal_data->directory_name . '/';
+    $dest_path1 = $proposal_dir_path . 'literature_survey/';
+    $dest_path = $dest_path1 . 'reference_files/';
     $bib_reference_upload = 0;
-            for ($i = 0; $i <= $v["bib_reference_count"]; $i++) {
+            for ($i = 0; $i < 3; $i++) {
                 //$f_id=$v['bib_reference_fieldset'][$i]["f_id"];
                 if ($v['bib_reference_fieldset'][$i]["resource_link"] != "") {
                     $bib_referencequery = "INSERT INTO hackathon_literature_survey_bib_references (submission_id,resource_link,resource_title,resource_author) VALUES (:submission_id,:resource_link,:resource_title,:resource_author)";
@@ -344,21 +370,30 @@ function add_literature_report_submission_form_submit($form, &$form_state){
                     }
                 }
             }
+    $existing_bib_reference_upload = 0;
+            for ($i = 0; $i <= $v["bib_reference_count"]; $i++) {
+                //$f_id=$v['bib_reference_fieldset'][$i]["f_id"];
+                if ($v['bib_reference_fieldset'][$i]["resource_link"] != "") {
+                    $bib_referencequery = "UPDATE set hackathon_literature_survey_bib_references
+                    resource_link = :resource_link,
+                    resource_title = :resource_title,
+                    resource_author = :resource_author
+                    WHERE submission_id = :submission_id";
+                    $bib_referenceargs = array(
+                        ":resource_link" => trim($v['existing_bib_reference_fieldset'][$i]["resource_link"]),
+                        ":resource_title" => trim($v['existing_bib_reference_fieldset'][$i]["resource_title"]),
+                        ":resource_author" => trim($v['existing_bib_reference_fieldset'][$i]["resource_author"]),
+                        ":submission_id" => $submission_id,
+                    );
+                    /* storing the row id in $result */
+                    $bib_referenceresult = db_query($bib_referencequery, $bib_referenceargs);
+                    if ($bib_referenceresult != 0) {
+                        $bib_referenceupload++;
+                    }
+                }
+            }
 
-
-    $proposal_dir_path = $directory_name . '/';
-    $dest_path1 = $proposal_dir_path . 'literature_survey/';
-    $dest_path = $dest_path1 . 'reference_files/';
-    //var_dump($dest_path1);die;    
-    if (!is_dir($root_path . $proposal_dir_path))
-            mkdir($root_path . $proposal_dir_path);
-    //var_dump($root_path . $proposal_dir_path);die;
-    if (!is_dir($root_path . $dest_path1))
-            mkdir($root_path . $dest_path1);
-    if (!is_dir($root_path . $dest_path))
-            mkdir($root_path . $dest_path);
-    //var_dump($root_path . $dest_path);die;
-    foreach ($_FILES['files']['name'] as $file_form_name => $file_name)
+	foreach ($_FILES['files']['name'] as $file_form_name => $file_name)
     {
         if ($file_name)
         {
@@ -382,17 +417,27 @@ function add_literature_report_submission_form_submit($form, &$form_state){
                     /* uploading file */
                     else if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
                     {
-                        $query = "INSERT INTO {hackathon_literature_survey_files} (submission_id, uid, filename, filepath, filemime, filesize, filetype, file_creation_date)
-          VALUES (:submission_id, :uid, :filename, :filepath, :filemime, :filesize, :filetype, :file_creation_date)";
+                    	$query_ab_f = "SELECT * FROM hackathon_literature_survey_files WHERE submission_id = :submission_id AND filetype = 
+				:filetype";
+						$args_ab_f = array(
+							":submission_id" => $submission_id,
+							":filetype" => $file_type
+						);
+						$query_ab_f_result = db_query($query_ab_f, $args_ab_f)->fetchObject();
+						unlink($root_path . $dest_path . $query_ab_f_result->filename);
+                        $query = "UPDATE {hackathon_literature_survey_files} set 
+                         filename = :filename, 
+                         filepath = :filepath,
+                         filemime = :filemime,
+                         filesize = :filesize
+                         WHERE submission_id = :submission_id and filetype = :filetype";
                             $args = array(
-                                ":submission_id" => $submission_id,
-                                ":uid" => $user->uid,
                                 ":filename" => $_FILES['files']['name'][$file_form_name],
                                 ":filepath" => $dest_path . $_FILES['files']['name'][$file_form_name],
                                 ":filemime" => mime_content_type($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]),
                                 ":filesize" => $_FILES['files']['size'][$file_form_name],
-                                ":filetype" => $file_type,
-                                ":file_creation_date" => time()
+                                ":submission_id" => $submission_id,
+                                "filetype" => $file_type
                             );
                         $updateresult = db_query($query, $args);
                         drupal_set_message($file_name . ' uploaded successfully.', 'status');
@@ -411,17 +456,27 @@ function add_literature_report_submission_form_submit($form, &$form_state){
                     /* uploading file */
                     else if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
                     {
-                        $query = "INSERT INTO {hackathon_literature_survey_files} (submission_id, uid, filename, filepath, filemime, filesize, filetype, file_creation_date)
-          VALUES (:submission_id, :uid, :filename, :filepath, :filemime, :filesize, :filetype, :file_creation_date)";
+                    	$query_ab_f = "SELECT * FROM hackathon_literature_survey_files WHERE submission_id = :submission_id AND filetype = 
+				:filetype";
+						$args_ab_f = array(
+							":submission_id" => $submission_id,
+							":filetype" => $file_type
+						);
+						$query_ab_f_result = db_query($query_ab_f, $args_ab_f)->fetchObject();
+						unlink($root_path . $dest_path . $query_ab_f_result->filename);
+                        $query = "UPDATE {hackathon_literature_survey_files} set 
+                         filename = :filename, 
+                         filepath = :filepath,
+                         filemime = :filemime,
+                         filesize = :filesize
+                         WHERE submission_id = :submission_id and filetype = :filetype";
                             $args = array(
-                                ":submission_id" => $submission_id,
-                                ":uid" => $user->uid,
                                 ":filename" => $_FILES['files']['name'][$file_form_name],
                                 ":filepath" => $dest_path . $_FILES['files']['name'][$file_form_name],
                                 ":filemime" => mime_content_type($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]),
                                 ":filesize" => $_FILES['files']['size'][$file_form_name],
-                                ":filetype" => $file_type,
-                                ":file_creation_date" => time()
+                                ":submission_id" => $submission_id,
+                                "filetype" => $file_type
                             );
                         $updateresult = db_query($query, $args);
                         drupal_set_message($file_name . ' uploaded successfully.', 'status');
@@ -435,12 +490,34 @@ function add_literature_report_submission_form_submit($form, &$form_state){
 
         }
     }
-    //_latex_generate_files($submission_id);
-        if (!$submission_id)
-        {
-            drupal_set_message(t('Error receiving your submission. Please try again.'), 'error');
-            return;
-        }
-        drupal_set_message(t('Your submission is successful'), 'status');
+    drupal_set_message('Updated successfully', 'status'); 
     drupal_goto('hackathon-submission/proposed');
+}
+
+function default_value_for_uploaded_reference_files($filetype, $submission_id)
+{
+    $filetype = $filetype;
+    $submission_id = $submission_id;
+    $query = db_select('hackathon_literature_survey_files');
+    $query->fields('hackathon_literature_survey_files');
+    $query->condition('submission_id', $submission_id);
+    $selected_files_array = "";
+    if ($filetype == "C")
+    {
+        $query->condition('filetype', $filetype);
+        $filetype_q = $query->execute()->fetchObject();
+        return $filetype_q;
+        //var_dump($filetype_q);die;
+    } //$filetype == "A"
+    elseif ($filetype == "W")
+    {
+        $query->condition('filetype', $filetype);
+        $filetype_q = $query->execute()->fetchObject();
+        return $filetype_q;
+    }
+    else
+    {
+        return;
+    }
+    return;
 }
