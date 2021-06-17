@@ -1,7 +1,5 @@
 <?php
-
-function add_literature_report_submission_form($form, $form_state, $no_js_use = FALSE)
-{
+function add_literature_report_submission(){
     global $user;
     if ($user->uid == 0)
     {
@@ -10,6 +8,27 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
         drupal_goto('user/login', array('query' => drupal_get_destination()));
         return $msg;
     } //$user->uid == 0
+    $today = date("Y-m-d H:i:s");
+    //var_dump($today);die;
+    $start_date = "2021-06-17 23:59:59.0"; 
+    $last_date = "2021-06-21 23:59:59.0";
+    $return_html = '';
+    if($today < $start_date){
+        $return_html .= '<p>You can submit your Literature Survey report at anytime between 18-06-2021, 12 AM and 21-06-2021, 23:59 PM.</p>';
+    }
+    elseif($today > $last_date){
+        $return_html .= '<p>Literature Survey Submissions are closed.</p>';
+    }
+    else{
+        $submission_form = drupal_get_form("add_literature_report_submission_form");
+        $return_html .= drupal_render($submission_form);
+    }
+    return $return_html;
+}
+
+function add_literature_report_submission_form($form, $form_state, $no_js_use = FALSE)
+{
+    
     $query = db_select('hackathon_literature_survey');
     $query->fields('hackathon_literature_survey');
     $query->condition('uid', $user->uid);
@@ -20,7 +39,7 @@ function add_literature_report_submission_form($form, $form_state, $no_js_use = 
     if ($proposal_data)
     {
          drupal_set_message(t('We have already received your submission. Use the edit submission below to make changes to your submission'), 'status');
-            drupal_goto('hackathon-submission/proposed');
+        drupal_goto('hackathon-submission/proposed');
             return;
          //$proposal_data->approval_status == 0 || $proposal_data->approval_status == 1
     }//$proposal_data

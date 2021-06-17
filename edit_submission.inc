@@ -138,9 +138,9 @@ function edit_literature_report_submission_form($form, $form_state, $no_js_use =
             '#prefix' => '<div id="existing_bib_reference-fieldset-wrapper">',
             '#suffix' => '</div>'
     ); 
-
+    $i = 0;
             while ($row_s = $result_bib_ref->fetchObject()) {
-
+            	
                 $temp = $i;
                 $form['existing_bib_reference_fieldset'][$i]["s_text"] = array(
                     "#type" => "item",
@@ -206,7 +206,7 @@ function edit_literature_report_submission_form($form, $form_state, $no_js_use =
             }
             $form["bib_reference_count"] = array(
                 "#type" => "hidden",
-                "#value" => $temp
+                "#value" => $num_of_fellowresults
             );
             /*if($i <3){
             $form['bib_reference_fieldset']['add_bib_reference'] = array(
@@ -366,31 +366,31 @@ function edit_literature_report_submission_form_submit($form, $form_state){
                         'return' => Database::RETURN_INSERT_ID
                     ));
                     if ($bib_referenceresult != 0) {
-                        $bib_referenceupload++;
+                        $bib_reference_upload++;
                     }
                 }
             }
     $existing_bib_reference_upload = 0;
             for ($i = 0; $i <= $v["bib_reference_count"]; $i++) {
                 //$f_id=$v['bib_reference_fieldset'][$i]["f_id"];
-                if ($v['bib_reference_fieldset'][$i]["resource_link"] != "") {
+                //if ($v['existing_bib_reference_fieldset'][$i]["resource_link"] != "") {
                     $bib_referencequery = "UPDATE hackathon_literature_survey_bib_references set
                     resource_link = :resource_link,
                     resource_title = :resource_title,
                     resource_author = :resource_author
-                    WHERE submission_id = :submission_id";
+                    WHERE id =:id";
                     $bib_referenceargs = array(
                         ":resource_link" => trim($v['existing_bib_reference_fieldset'][$i]["resource_link"]),
                         ":resource_title" => trim($v['existing_bib_reference_fieldset'][$i]["resource_title"]),
                         ":resource_author" => trim($v['existing_bib_reference_fieldset'][$i]["resource_author"]),
-                        ":submission_id" => $submission_id,
+                        ":id" => $v['existing_bib_reference_fieldset'][$i]["id"]
                     );
                     /* storing the row id in $result */
                     $bib_referenceresult = db_query($bib_referencequery, $bib_referenceargs);
                     if ($bib_referenceresult != 0) {
-                        $bib_referenceupload++;
+                        $existing_bib_reference_upload++;
                     }
-                }
+                //}
             }
 
 	foreach ($_FILES['files']['name'] as $file_form_name => $file_name)

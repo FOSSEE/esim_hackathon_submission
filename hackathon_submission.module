@@ -91,10 +91,10 @@ $items["hackathon-submission/descriptioninfo"] = array(
     );
     $items["hackathon-submission/add/literature-report"] = array(
         "title" => "CSMD submission",
-        "page callback" => 'drupal_get_form',
-        'page arguments' => array(
-            'add_literature_report_submission_form'
-        ),
+        "page callback" => 'add_literature_report_submission',
+        /*'page arguments' => array(
+            'add_literature_report_submission'
+        ),*/
         "access arguments" => array(
             "add hackathon_submission"
         ),
@@ -248,7 +248,14 @@ function hackathon_submission_display_my_submissions()
         else if($my_proposals_data->approval_status == 0){
             $action = 'Proposal pending for review';
         }*/
+        $today = date("Y-m-d H:i:s");
+        $last_date = "2021-06-21 23:59:59.0";
+        if($today > $last_date){
+            $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id);  
+        }
+        else{
         $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id) . ' | ' . l('Edit', 'hackathon-submission/edit/literature-report/' . $my_proposals_data->id);
+        }
         $my_proposal_rows[$my_proposals_data->id] = array(
             date('d-m-Y', $my_proposals_data->creation_date),
             l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
@@ -259,7 +266,7 @@ function hackathon_submission_display_my_submissions()
     /* check if there are any pending proposals */
     if (!$my_proposal_rows)
     {
-        drupal_set_message(t('You do not have any active submissions. Click here to propose'), 'status');
+        drupal_set_message(t('You do not have any active submissions. To submit, click ') . l('here', 'hackathon-submission/add/literature-report'), 'status');
         return '';
     } //!$pending_rows
     $my_proposal_header = array(
