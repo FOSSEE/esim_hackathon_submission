@@ -28,7 +28,7 @@ function add_literature_report_submission(){
 
 function add_literature_report_submission_form($form, $form_state, $no_js_use = FALSE)
 {
-    
+    global $user;
     $query = db_select('hackathon_literature_survey');
     $query->fields('hackathon_literature_survey');
     $query->condition('uid', $user->uid);
