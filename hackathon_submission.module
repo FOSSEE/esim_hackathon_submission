@@ -814,7 +814,8 @@ function _latex_generate_files($submission_id)
     /********************* Write to tex file ***********************/
     $bibscript = '';
     while($bib_ref_data = $bib_references_q->fetchObject()){
-    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={' . $bib_ref_data->resource_author . '}, title={' . $bib_ref_data->resource_title . '}, howpublished={' . $bib_ref_data->resource_link . '}}' . $eol;
+        $resource_link = str_replace("_", "\_", $bib_ref_data->resource_link);
+    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={' . $bib_ref_data->resource_author . '}, title={' . $bib_ref_data->resource_title . '}, howpublished={' . $resource_link . '}}' . $eol;
 }
 
 $circuit_details = str_replace("_", "\_", $submission_data->circuit_details);
@@ -837,7 +838,7 @@ fclose($bib_file);
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{url}
+%\usepackage{url}
 %% Sets page size and margins
 \usepackage[a4paper,top=1cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
 \usepackage{float}
@@ -848,7 +849,7 @@ fclose($bib_file);
 %\usepackage{ieee}
 %\usepackage[colorinlistoftodos]{todonotes}
 %\usepackage[colorlinks=true, allcolors=blue]{hyperref}
-\usepackage{underscore}
+%\usepackage{underscore}
 
 \title{ ' . $circuit_name . ' }
 
