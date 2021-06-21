@@ -47,6 +47,14 @@ function hackathon_submission_menu()
         ),
         "type" => MENU_CALLBACK
     );
+    $items["hackathon-submission/download-emails"] = array(
+        "title" => "List of all submissions",
+        "page callback" => "hackathon_submission_download_emails",
+        "access arguments" => array(
+            "manage hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK
+    );
  $items["hackathon-submission/description"] = array(
         "title" => "More Details",
         "page callback" => "hackathon_submission_get_description",
@@ -310,7 +318,7 @@ function hackathon_submission_display_all_submissions()
     //$query->condition('uid',$user->uid);
     $query->orderBy('id', 'DESC');
     $my_submissions_q = $query->execute();
-    $output = "<p>Total number of submissions: " . $my_submissions_q->rowCount() . "</p>";
+    $output = "<p>Total number of submissions: " . $my_submissions_q->rowCount() . "</p><p>Click <a href='download-emails'>here</a> to download the Email IDs of the participants";
     while ($my_submissions_data = $my_submissions_q->fetchObject())
     {
         $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_submissions_data->id);  
@@ -339,6 +347,59 @@ function hackathon_submission_display_all_submissions()
         'rows' => $my_submission_rows
     ));
     return $output;
+}
+
+function hackathon_submission_download_emails(){
+    global $user;
+    /* get pending submissions to be approved */
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to login on this website to download the email IDs of the participants. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('/pssp');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    }
+    $root_path = hackathon_submission_files_path();
+    $my_submission_rows = array();
+    $query = db_select('hackathon_literature_survey');
+    $query->fields('hackathon_literature_survey');
+    //$query->condition('approval_status', 2);
+    //$query->condition('uid',$user->uid);
+    $all_submissions_q = $query->execute();
+    $participants_email_id_file = $root_path . "participants-emails.csv";
+    //var_dump($participants_email_id_file);die;
+    $fp = fopen($participants_email_id_file, "w");
+            /* making the first row */
+            $item = array(
+                "Email ID"
+            );
+            fputcsv($fp, $item);
+
+            while($row = $all_submissions_q->fetchObject()) {
+                $item = array(
+                    $row->participant_email
+                );
+                fputcsv($fp, $item);
+            }
+            fclose($fp);
+            if($participants_email_id_file){
+        ob_clean();
+            header("Pragma: public");
+            header("Expires: 0");
+            header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+            header("Cache-Control: public");
+            header("Content-Description: File Transfer");
+            header('Content-Type: application/csv');
+            header('Content-disposition: attachment; filename=email-ids.csv');
+            header('Content-Length:' . filesize($participants_email_id_file));
+            header("Content-Transfer-Encoding: binary");
+            header('Expires: 0');
+            header('Pragma: no-cache');
+            readfile($participants_email_id_file);
+            /*ob_end_flush();
+            ob_clean();
+            flush();*/
+        }
 }
 
 
