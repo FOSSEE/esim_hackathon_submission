@@ -878,7 +878,7 @@ $replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}", "\^");
     $bibscript = '';
     while($bib_ref_data = $bib_references_q->fetchObject()){
         $resource_link = str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_link);
-    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={' . $bib_ref_data->resource_author . '}, title={' . $bib_ref_data->resource_title . '}, howpublished={' . $resource_link . '}}' . $eol;
+    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={' . str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_author) . '}, title={' . str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_title) . '}, howpublished={' . $resource_link . '}}' . $eol;
 }
 
 $circuit_details = str_replace($special_chars, $replace_special_chars, $submission_data->circuit_details);
