@@ -50,7 +50,6 @@ function edit_literature_report_submission_form($form, $form_state, $no_js_use =
     );*/
     $form['circuit_name'] = array(
         '#title' => t('Circuit Name'),
-        '#disabled' => TRUE,
         '#type' => 'textfield',
         '#size' => 70,
         '#maxlength' => 70,
@@ -336,10 +335,12 @@ function edit_literature_report_submission_form_submit($form, $form_state){
 	$v = $form_state['values'];
 	$root_path = hackathon_submission_files_path();
 	$query = "UPDATE hackathon_literature_survey SET 
+				circuit_name = :circuit_name,
 				abstract=:abstract,
 				circuit_details=:circuit_details
 				WHERE id=:submission_id";
 	$args = array(
+		":circuit_name" => $v['circuit_name'],
 		':abstract' => $v['abstract'],
 		':circuit_details' => $v['circuit_details'],
 		':submission_id' => $submission_id
