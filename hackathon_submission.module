@@ -839,7 +839,7 @@ fclose($bib_file);
 %   Fill in details where prompted
 %
 %% Language and font encodings
-\usepackage[english]{babel}
+\usepackage[english, greek]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 %\usepackage{url}
