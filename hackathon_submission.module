@@ -812,15 +812,19 @@ function _latex_generate_files($submission_id)
                 $reference_filedata .= $eol;
         }*/ //$example_data = $example_q->fetchObject()
     /********************* Write to tex file ***********************/
+    $special_chars = array("_", "&", "%", "#", "{", "}", "^");
+$replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}", "\^");
     $bibscript = '';
     while($bib_ref_data = $bib_references_q->fetchObject()){
-        $resource_link = str_replace("_", "\_", $bib_ref_data->resource_link);
+        $resource_link = str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_link);
     $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={' . $bib_ref_data->resource_author . '}, title={' . $bib_ref_data->resource_title . '}, howpublished={' . $resource_link . '}}' . $eol;
 }
 
-$circuit_details = str_replace("_", "\_", $submission_data->circuit_details);
-$abstract = str_replace("_", "\_", $submission_data->abstract);
-$circuit_name = str_replace("&", "\&", $submission_data->circuit_name);
+$circuit_details = str_replace($special_chars, $replace_special_chars, $submission_data->circuit_details);
+$abstract = str_replace($special_chars, $replace_special_chars, $submission_data->abstract);
+$circuit_name = str_replace($special_chars, $replace_special_chars, $submission_data->circuit_name);
+$participant_name = str_replace($special_chars, $replace_special_chars, $submission_data->participant_name);
+$participant_institute = str_replace($special_chars, $replace_special_chars, $submission_data->institute);
 
 $bib_fn="references.bib";
 $bib_file = fopen($dir_path . $bib_fn, "w");
@@ -854,7 +858,7 @@ fclose($bib_file);
 \title{ ' . $circuit_name . ' }
 
 \usepackage{authblk}
-\author[1]{' . $submission_data->participant_name . ', ' . $submission_data->institute . '}
+\author[1]{' . $participant_name . ', ' . $participant_institute . '}
 
 \begin{document}
 \maketitle
@@ -905,7 +909,7 @@ $ref_fn = $submission_data->id . "_literature_survey_report";
 
 $sh_command = "/bin/bash pdf_creator.sh " . $fn . " " . $ref_fn;
 exec($sh_command);
-
+$download_filename = $submission_data->id . "_literature_survey_report.pdf";
 
 if (filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf") == TRUE)
         {
@@ -916,7 +920,7 @@ if (filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf")
             header("Cache-Control: public");
             header("Content-Description: File Transfer");
             header('Content-Type: application/pdf');
-            header('Content-disposition: attachment; filename="' . $submission_data->id . "_literature_survey_report.pdf'");
+            header('Content-disposition: attachment; filename=' . $download_filename);
             header('Content-Length: ' . filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf"));
             header("Content-Transfer-Encoding: binary");
             header('Expires: 0');
