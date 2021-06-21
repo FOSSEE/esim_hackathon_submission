@@ -848,6 +848,7 @@ fclose($bib_file);
 %\usepackage{ieee}
 %\usepackage[colorinlistoftodos]{todonotes}
 %\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{underscore}
 
 \title{ ' . $circuit_name . ' }
 
