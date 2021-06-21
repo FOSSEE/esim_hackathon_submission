@@ -277,6 +277,14 @@ function edit_form_bib_reference_add_more_remove_one($form, &$form_state) {
 
 
 function edit_literature_report_submission_form_validate($form, &$form_state){
+	if (strlen($form_state['values']['abstract']) < 600)
+        {
+            form_set_error('abstract', t('Minimum charater limit for abstract is 600 charaters'));
+        }
+    if (strlen($form_state['values']['circuit_details']) < 1334)
+        {
+            form_set_error('circuit_details', t('Minimum charater limit for circuit details is 1334 charaters'));
+        }
     if (isset($_FILES['files']))
     {
         /* check if atleast one source or result file is uploaded */
