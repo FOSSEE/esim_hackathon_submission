@@ -812,8 +812,8 @@ function _latex_generate_files($submission_id)
                 $reference_filedata .= $eol;
         }*/ //$example_data = $example_q->fetchObject()
     /********************* Write to tex file ***********************/
-    $special_chars = array("_", "&", "%", "#", "{", "}");
-$replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}");
+    $special_chars = array("_", "&", "%", "#", "{", "}", "^");
+$replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}", "\^");
     $bibscript = '';
     while($bib_ref_data = $bib_references_q->fetchObject()){
         $resource_link = str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_link);
