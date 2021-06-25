@@ -47,6 +47,33 @@ function hackathon_submission_settings_form($form, $form_state)
 		'#required' => TRUE,
 		'#default_value' => variable_get('reference_waveform_extensions', '')
 	);
+	$form['extensions']['main_netlist'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Allowed file extensions for uploading Main netlist file'),
+		'#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('main_netlist_file_extensions', '')
+	);
+	$form['extensions']['sub_circuit_file'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Allowed file extensions for uploading sub circuit file'),
+		'#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('subcircuit_file_extensions', '')
+	);
+	$form['extensions']['read_me'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Allowed file extensions for uploading Read me file'),
+		'#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('readme_file_extensions', '')
+	);
 	/*$form['no_of_images_allowed_project_submission'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Enter the number of images that can be uploaded during project submission'),
@@ -79,7 +106,8 @@ function hackathon_submission_settings_form_submit($form, &$form_state)
 	variable_set('hackathon_submission_from_email', $form_state['values']['from_email']);
 	*/variable_set('reference_circuit_extensions', $form_state['values']['reference_circuit']);
 	variable_set('reference_waveform_extensions', $form_state['values']['reference_waveform']);
-	/*variable_set('no_of_images_allowed_project_submission', $form_state['values']['no_of_images_allowed_project_submission']);
-	variable_set('project_design_files_extensions', $form_state['values']['project_design_files']);*/
+	variable_set('main_netlist_file_extensions', $form_state['values']['main_netlist']);
+	variable_set('subcircuit_file_extensions', $form_state['values']['sub_circuit_file']);
+	variable_set('readme_file_extensions', $form_state['values']['read_me']);
 	drupal_set_message(t('Settings updated'), 'status');
 }

@@ -55,55 +55,70 @@ function hackathon_submission_menu()
         ),
         "type" => MENU_CALLBACK
     );
- $items["hackathon-submission/description"] = array(
-        "title" => "More Details",
-        "page callback" => "hackathon_submission_get_description",
-        "access arguments" => array(
-            "access hackathon_submission"
-        ),
-        "type" => MENU_CALLBACK
-    );
- $items['hackathon-submission/generate-report/literature-survey'] = array(
-        'title' => 'Generate Literature Survey Report',
-        'description' => 'Generate Literature Survey Report',
-        'page callback' => 'download_literature_survey_report',
+     $items["hackathon-submission/description"] = array(
+            "title" => "More Details",
+            "page callback" => "hackathon_submission_get_description",
+            "access arguments" => array(
+                "access hackathon_submission"
+            ),
+            "type" => MENU_CALLBACK
+        );
+     $items['hackathon-submission/generate-report/literature-survey'] = array(
+            'title' => 'Generate Literature Survey Report',
+            'description' => 'Generate Literature Survey Report',
+            'page callback' => 'download_literature_survey_report',
+            'access arguments' => array(
+                'access hackathon_submission'
+            ),
+            'type' => MENU_CALLBACK,
+            'file' => 'latex.inc'
+        );
+     $items['hackathon-submission/generate-report/final-submission'] = array(
+        'title' => 'Generate Final Submission Report',
+        'description' => 'Generate Final Submission Report',
+        'page callback' => 'download_final_submission_report',
         'access arguments' => array(
             'access hackathon_submission'
         ),
         'type' => MENU_CALLBACK,
         'file' => 'latex.inc'
     );
-$items["hackathon-submission/descriptioninfo"] = array(
-        "title" => "File Details",
-        "page callback" => "hackathon_submission_get_descriptioninfo",
-        "access arguments" => array(
-           "convert hackathon_submission"
-        ),
-        "type" => MENU_CALLBACK
-    );
-    $items['hackathon-submission/download/file'] = array(
-    'title' => 'File Download',
-    'description' => 'File Download', 
-    'page callback' => 'hackathon_submission_download_file',
-    'access arguments' => array("access hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
-  $items['hackathon-submission/download/pdf'] = array(
-    'title' => 'Description PDF File Download',
-    'description' => 'Description PDF File Download', 
-    'page callback' => 'hackathon_submission_download_pdf_file',
-    'access arguments' => array("access hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
-    $items["hackathon-submission/add"] = array(
+    $items["hackathon-submission/descriptioninfo"] = array(
+            "title" => "File Details",
+            "page callback" => "hackathon_submission_get_descriptioninfo",
+            "access arguments" => array(
+               "convert hackathon_submission"
+            ),
+            "type" => MENU_CALLBACK
+        );
+        $items['hackathon-submission/download/file'] = array(
+        'title' => 'File Download',
+        'description' => 'File Download', 
+        'page callback' => 'hackathon_submission_download_file',
+        'access arguments' => array("access hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        
+      );
+      $items['hackathon-submission/download/pdf'] = array(
+        'title' => 'Description PDF File Download',
+        'description' => 'Description PDF File Download', 
+        'page callback' => 'hackathon_submission_download_pdf_file',
+        'access arguments' => array("access hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        
+      );
+
+    $items["hackathon-submission/add/project-files"] = array(
         "title" => "Hackathon Submission Form",
-        "page callback" => "hackathon_submission_add_form_display",
+        "page callback" => "drupal_get_form",
+        "page arguments" => array(
+            "hackathon_submission_add_project_files_form"
+        ),
         "access arguments" => array(
             "manage hackathon_submission"
         ),
-        "type" => MENU_CALLBACK
+        "type" => MENU_CALLBACK,
+        "file" => 'final_submission.inc'
     );
     $items["hackathon-submission/add/literature-report"] = array(
         "title" => "CSMD submission",
@@ -117,6 +132,18 @@ $items["hackathon-submission/descriptioninfo"] = array(
         "type" => MENU_CALLBACK,
         'file' => 'add_submission.inc'
     );
+    $items["hackathon-submission/add/final-submission"] = array(
+        "title" => "CSMD Final submission",
+        "page callback" => 'add_final_submission_report_submission',
+        /*'page arguments' => array(
+            'add_literature_report_submission'
+        ),*/
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
     $items["hackathon-submission/edit/literature-report"] = array(
         "title" => "Edit CSMD submission",
         "page callback" => 'drupal_get_form',
@@ -128,6 +155,30 @@ $items["hackathon-submission/descriptioninfo"] = array(
         ),
         "type" => MENU_CALLBACK,
         'file' => 'edit_submission.inc'
+    );
+    $items["hackathon-submission/edit/final-submission"] = array(
+        "title" => "Edit CSMD Final submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_final_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
+    $items["hackathon-submission/edit/project-files"] = array(
+        "title" => "Edit CSMD Project Files",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_project_files_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
     );
 	$items["hackathon-submission/your-upload"] = array(
         "title" => "LIST OF FILES UPLOADED BY USER",
@@ -212,11 +263,19 @@ function hackathon_submission_check_valid_filename($file_name) {
   if (preg_match("/\\s/", $file_name))
     return FALSE;
   else
-    if (substr_count($file_name, ".") > 1)
+    /*if (substr_count($file_name, ".") > 1)
       return FALSE;
-    else
-      return TRUE;
+    else*/
+    return TRUE;
 }
+
+/*function hs_check_special_characters($string){
+    //$whiteListed = "\#\^\+\-\_\.\&()%\/";
+    if(preg_match('/[^a-zA-Z\d]/', $string))
+        return FALSE;
+    else
+        return TRUE;
+}*/
 
 function hackathon_submission_upload_path() {
   return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'hackathon_submission_uploads/';
@@ -226,13 +285,13 @@ function hackathon_submission_convert_path() {
   return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'hackathon_submission_converts';
 }
 
-function hackathon_submission_add_form_display()
+/*function hackathon_submission_add_form_display()
 {
     $page_content = "";
     $hackathon_submission_add_form = drupal_get_form("hackathon_submission_add_form");
     $page_content = drupal_render($hackathon_submission_add_form);
     return $page_content;
-}
+}*/
 
 
 function hackathon_submission_display_my_submissions()
@@ -246,39 +305,68 @@ function hackathon_submission_display_my_submissions()
         drupal_goto('user/login', array('query' => drupal_get_destination()));
         return $msg;
     }
-    $my_proposal_rows = array();
+    $output = "<p>Final Submission</p>";
+    $final_submission_rows = array();
     $query = db_select('hackathon_literature_survey');
     $query->fields('hackathon_literature_survey');
     //$query->condition('approval_status', 2);
     $query->condition('uid',$user->uid);
     $query->orderBy('id', 'DESC');
     $my_proposals_q = $query->execute();
-    while ($my_proposals_data = $my_proposals_q->fetchObject())
+    $my_proposals_data = $my_proposals_q->fetchObject();
+    $query = db_select('hackathon_final_submission');
+    $query->fields('hackathon_final_submission');
+    $query->condition('uid',$user->uid);
+    $query->condition('literature_survey_id', $my_proposals_data->id);
+    $query->orderBy('id', 'DESC');
+    $final_submission_q = $query->execute();
+    $final_submission_data = $final_submission_q->fetchObject();
+    $today = date("Y-m-d H:i:s");
+    $final_submission_last_date = "2021-06-30 23:59:59.0";
+    if($today > $final_submission_last_date){
+        $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_last_date->literature_survey_id);  
+    }
+    else{
+    $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Final Report', 'hackathon-submission/edit/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Project Files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
+    }
+    $final_submission_rows[$final_submission_data->id] = array(
+        date('d-m-Y', $final_submission_data->creation_date),
+        l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
+        $my_proposals_data->circuit_name,
+        $action
+    );
+    /* check if there are any pending proposals */
+    if (!$final_submission_rows)
     {
-       /* if($my_proposals_data->approval_status == 2){
-            $action = l('Edit', 'arduino-projects/my-proposals/edit/' . $my_proposals_data->id);
-            }
-        else if($my_proposals_data->approval_status == 1 or $my_proposals_data->approval_status == 3 or $my_proposals_data->approval_status == 4){
-            $action =   l('View', 'arduino-projects/my-proposals/view/' . $my_proposals_data->id);
-            }
-        else if($my_proposals_data->approval_status == 0){
-            $action = 'Proposal pending for review';
-        }*/
-        $today = date("Y-m-d H:i:s");
-        $last_date = "2021-06-21 23:59:59.0";
-        if($today > $last_date){
-            $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id);  
-        }
-        else{
-        $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id) . ' | ' . l('Edit', 'hackathon-submission/edit/literature-report/' . $my_proposals_data->id);
-        }
-        $my_proposal_rows[$my_proposals_data->id] = array(
-            date('d-m-Y', $my_proposals_data->creation_date),
-            l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
-            $my_proposals_data->circuit_name,
-            $action
-        );
-    } //$pending_data = $pending_q->fetchObject()
+        drupal_set_message(t('You do not have any active submissions. To submit, click ') . l('here', 'hackathon-submission/add/literature-report'), 'status');
+        return '';
+    } //!$pending_rows
+    $final_submission_header = array(
+        'Date of Submission',
+        'Name',
+        'Circuit Name',
+        ''
+    );
+    //$output = theme_table($pending_header, $pending_rows);
+    $output .= theme('table', array(
+        'header' => $final_submission_header,
+        'rows' => $final_submission_rows
+    ));
+    $output .= "<p>Literature Survey</p>";
+    $my_proposal_rows = array();
+    $last_date = "2021-06-21 23:59:59.0";
+    if($today > $last_date){
+        $action =   l('Download Literature Survey Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id);  
+    }
+    else{
+    $action =   l('Download Literature Survey Report', 'hackathon-submission/generate-report/literature-survey/' . $my_proposals_data->id) . ' | ' . l('Edit', 'hackathon-submission/edit/literature-report/' . $my_proposals_data->id);
+    }
+    $my_proposal_rows[$my_proposals_data->id] = array(
+        date('d-m-Y', $my_proposals_data->creation_date),
+        l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
+        $my_proposals_data->circuit_name,
+        $action
+    );
     /* check if there are any pending proposals */
     if (!$my_proposal_rows)
     {
@@ -292,7 +380,7 @@ function hackathon_submission_display_my_submissions()
         ''
     );
     //$output = theme_table($pending_header, $pending_rows);
-    $output = theme('table', array(
+    $output .= theme('table', array(
         'header' => $my_proposal_header,
         'rows' => $my_proposal_rows
     ));
@@ -321,7 +409,14 @@ function hackathon_submission_display_all_submissions()
     $output = "<p>Total number of submissions: " . $my_submissions_q->rowCount() . "</p><p>Click <a href='download-emails'>here</a> to download the Email IDs of the participants";
     while ($my_submissions_data = $my_submissions_q->fetchObject())
     {
-        $action =   l('Download Report', 'hackathon-submission/generate-report/literature-survey/' . $my_submissions_data->id);  
+        $query = db_select('hackathon_final_submission');
+        $query->fields('hackathon_final_submission');
+        //$query->condition('approval_status', 2);
+        $query->condition('literature_survey_id',$my_submissions_data->id);
+        $query->orderBy('id', 'DESC');
+        $final_submissions_q = $query->execute();
+        $final_submission_data = $final_submissions_q->fetchObject();
+        $action =   l('Download Literature Survey Report', 'hackathon-submission/generate-report/literature-survey/' . $my_submissions_data->id) . ' | ' . l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id);  
         $my_submission_rows[$my_submissions_data->id] = array(
             date('d-m-Y', $my_submissions_data->creation_date),
             l($my_submissions_data->participant_name, 'user/' . $my_submissions_data->uid),
@@ -402,603 +497,6 @@ function hackathon_submission_download_emails(){
         }
 }
 
-
-
-function hackathon_submission_add_form($form, $form_state, $no_js_use = FALSE)
-{
-    global $user;
-    if ($user->uid == 0)
-    {
-        $msg = drupal_set_message(t('It is mandatory to log in on this website to upload your submission. If you are new user please create a new account first.'), 'error');
-        //drupal_goto('esim-circuit-simulation-project');
-        drupal_goto('user');
-        return $msg;
-    } //$user->uid == 0
-    $query = db_select('submission_hackathon2021');
-    $query->fields('submission_hackathon2021');
-    $query->condition('uid', $user->uid);
-    $query->orderBy('id', 'DESC');
-    $query->range(0, 1);
-    $proposal_q = $query->execute();
-    $proposal_data = $proposal_q->fetchObject();
-    if ($proposal_data)
-    {
-        if ($proposal_data->approval_status == 0 || $proposal_data->approval_status == 1)
-        {
-            drupal_set_message(t('We have already received your submission.'), 'status');
-            drupal_goto('');
-            return;
-        } //$proposal_data->approval_status == 0 || $proposal_data->approval_status == 1
-    } //$proposal_data
-    $form = array();
-    $form['participant_name'] = array(
-    	'#title' => t('Name'),
-    	'#type' => 'textfield',
-    	'#size' => 70,
-    	'#maxlength' => 70
-    );
-    $form['participant_email'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Email'),
-		'#size' => 30,
-		'#value' => $user->mail,
-		'#disabled' => TRUE
-	);
-	$form['institute'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Name of the college/institute'),
-		'#size' => 70,
-		'#maxlength' => 70,
-		'#required' => TRUE,
-	);
-   /* $form['circuit'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Circuits'),
-        '#collapsible' => FALSE,
-        '#collapsed' => FALSE
-    );*/
-    $form['circuit_name'] = array(
-        '#title' => t('Circuit Name'),
-        '#type' => 'textfield',
-        '#size' => 70,
-        '#maxlength' => 70,
-        '#required' => TRUE
-    );
-    $form['circuit_type'] = array(
-        '#type' => 'select',
-        '#title' => t('Circuit Type'),
-        '#required' => TRUE,
-        '#options' => array(
-            'Analog' => 'Analog',
-            'Digital' => 'Digital',
-            'Mixed-signal' =>  'Mixed-signal'
-            ),
-    );
-    $form['input_pins'] = array(
-        '#title' => t('Input pins'),
-        '#type' => 'textfield',
-        '#description' => t('For eg: in1, in2, sigma_1, emitter-bjt1'),
-        '#size' => 70,
-        '#maxlength' => 255,
-        '#required' => TRUE
-    );
-    $form['output_pins'] = array(
-        '#title' => t('Output pins'),
-        '#type' => 'textfield',
-        '#description' => t('For eg: out1, out2, delta_1, sum, carry'),
-        '#size' => 70,
-        '#maxlength' => 255,
-        '#required' => TRUE
-    );
-    $form['reference_files'] = array(
-        '#type' => 'fieldset',
-        '#tree' => TRUE,
-        '#prefix' => '<div id="names-fieldset-wrapper">',
-        '#suffix' => '</div>',
-        '#title' => t('Upload Subcircuit files'),
-    );
-    if (empty($form_state['num_names'])) {
-        $form_state['num_names'] = 1;
-    }
-    for ($i = 0; $i < $form_state['num_names']; $i++) {
-        $temp_no = $i;
-        $form['reference_files']['subcircuit'][$i] = array(
-            '#type' => 'managed_file',
-            //'#weight' => '5',
-            '#description' => t('Upload filenames with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('reference_subcircuit_extensions', '') . '</span>',
-            // We need this to know which file element this is.
-            // By default drupal would name all as files[reference_files]
-            '#name' => 'files[reference_files_' . $i . '_name]',
-            '#upload_location' => 'public://images/proposal_images',
-            '#upload_validators' => array(
-                'file_validate_extensions' => array(variable_get('reference_subcircuit_extensions', '')),
-                // Pass the maximum file size in bytes
-                /*'file_validate_size' => array(5*1024*1024),*/
-              ),
-        );
-        $form['reference_files']["subcircuit_count"] = array(
-            "#type" => "hidden",
-            "#value" => $temp_no
-        );
-    }
-    $form['reference_files']['add_name'] = array(
-        '#type' => 'submit',
-        '#value' => t('Add More'),
-        '#limit_validation_errors' => array(),
-        '#submit' => array(
-            'reference_files_add_more_add_one'
-        ),
-        '#ajax' => array(
-            'callback' => 'reference_files_add_more_callback',
-            'wrapper' => 'names-fieldset-wrapper'
-        )
-    );
-    if ($form_state['num_names'] > 1) {
-        $form['reference_files']['remove_name'] = array(
-            '#type' => 'submit',
-            '#value' => t('Remove Image'),
-            '#limit_validation_errors' => array(),
-            '#submit' => array(
-                'reference_files_add_more_remove_one'
-            ),
-            '#ajax' => array(
-                'callback' => 'reference_files_add_more_callback',
-                'wrapper' => 'names-fieldset-wrapper'
-            )
-        );
-    }
-    if ($no_js_use) {
-        if (!empty($form['reference_files']['remove_name']['#ajax'])) {
-            unset($form['reference_files']['remove_name']['#ajax']);
-        }
-        unset($form['reference_files']['add_name']['#ajax']);
-    }
-	$form['source_file'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Upload Main Netlist file'),
-        '#collapsible' => FALSE,
-        '#collapsed' => FALSE
-    );
-    $form['source_file']['main_netlist'] = array(
-        '#type' => 'file',
-        //'#title' => t('Upload circuit diagram'),
-        '#size' => 48,
-        '#description' => t('Upload filenames with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions : ') . variable_get('main_netlist_file_extensions', '') . '</span>'
-    );
-    $form["submit"] = array(
-        "#type" => "submit",
-	'#weight' => '6',
-        "#value" => "Submit"
-    );
-    return $form;
-}
-/*
-function reference_files_add_more_callback($form, $form_state) {
-    return $form['reference_files'];
-}
-
-
-function reference_files_add_more_add_one($form, &$form_state) {
-    $form_state['num_names']++;
-    $form_state['rebuild'] = TRUE;
-    //$form_state['no_redirect'] = TRUE;
-}
-
-
-function reference_files_add_more_remove_one($form, &$form_state) {
-    if ($form_state['num_names'] > 1) {
-        $form_state['num_names']--;
-    }
-    $form_state['rebuild'] = TRUE;
-}*/
-
-/*function hackathon_submission_add_form_validate($form, &$form_state){
-    $num_files = COUNT($form_state['values']['reference_files']['sub_circuit']);
-    if (($num_files > 0)) {
-        for ($i = 0; $i < $num_files; $i++) {
-            $attachment[$i] = file_load($form_state['values']['reference_files']['sub_circuit'][$i]);
-            $filename = $attachment[$i]->filename;
-            //var_dump($attachment[$i]->uri);die;
-            $allowed_extensions_str = variable_get('reference_sub_circuit_extensions', '');
-                $allowed_extensions = explode(' ', $allowed_extensions_str);
-                $fnames = explode('.', strtolower($filename));
-                $temp_extension = end($fnames);
-                if (!in_array($temp_extension, $allowed_extensions))
-                    form_set_error($form_state['values']['reference_files']['sub_circuit'][$i], t('Only file with ' . $allowed_extensions_str . ' extensions can be uploaded.'));
-                if ($attachment[$i]->filesize<= 0)
-                    form_set_error($attachment[$i], t('File size cannot be zero.'));
-                 //check if valid file name 
-                if (!hackathon_submission_check_valid_filename($filename))
-                    form_set_error($attachment[$i], t('Invalid file name specified. Only alphabets and numbers are allowed as a valid filename.'));
-        }
-    }
-}*/
-
-function hackathon_submission_add_form_submit($form, &$form_state){
-    global $user;
-    $root_path = hackathon_submission_files_path();
-    $v = $form_state["values"];
-    $circuit_name = trim($v['circuit_name']);
-    $participant_name = trim($v['participant_name']);
-    $directory_name = _hs_dir_name($circuit_name, $participant_name);
-    $result = "INSERT INTO submission_hackathon2021 
-    (
-    uid, 
-    participant_name,
-    participant_email,
-    institute,
-    circuit_name, 
-    circuit_type, 
-    input_pins, 
-    output_pins,
-    directory_name,
-    creation_date
-    ) VALUES
-    (
-    :uid, 
-    :participant_name, 
-    :participant_email,
-    :institute, 
-    :circuit_name, 
-    :circuit_type, 
-    :input_pins,  
-    :output_pins,
-    :directory_name,
-    :creation_date
-    )";
-    $args = array(
-        ":uid" => $user->uid,
-        ":participant_name" => $participant_name,
-        ":participant_email" => $v['participant_email'],
-        ":institute" => trim($v['institute']),
-        ":circuit_name" => $circuit_name,
-        ":circuit_type" => trim($v['circuit_type']),
-        ":input_pins" => trim($v['input_pins']),
-        ":output_pins" => trim($v['output_pins']),
-        ":directory_name" => $directory_name,
-        ":creation_date" => time()
-        );
-    //  var_dump($args);die;
-    //var_dump($result);die;
-    $submission_id = db_query($result, $args, array(
-        'return' => Database::RETURN_INSERT_ID
-    ));
-    $proposal_dir_path = $directory_name . '/';
-    $dest_path = $proposal_dir_path . 'subcircuit_files/';
-    //var_dump($dest_path1);die;    
-    if (!is_dir($root_path . $proposal_dir_path))
-            mkdir($root_path . $proposal_dir_path);
-    //var_dump($root_path . $proposal_dir_path);die;
-    if (!is_dir($root_path . $dest_path))
-            mkdir($root_path . $dest_path);
-    //var_dump($root_path . $dest_path);die;
-    $imageupload = 0;
-        /* uploading files */
-        $num_files = COUNT($form_state['values']['reference_files']['subcircuit']);
-        //var_dump($num_files);die;
-
-        if (($num_files > 0)) {
-        for ($i = 0; $i < $num_files; $i++) {
-            $attachment[$i] = file_load($form_state['values']['reference_files']['subcircuit'][$i]);
-            $filename = $attachment[$i]->filename;
-            //var_dump($attachment[$i]->uri);die;
-            if (file_exists($root_path . $dest_path . $attachment[$i]->filename)) {
-                    drupal_set_message(t("Error uploading file. File !filename already exists."), array(
-                        '!filename' => $attachment[$i]
-                    ), 'error');
-                    return;
-                }
-                /* uploading file */
-               else if (file_unmanaged_move($attachment[$i]->uri, $root_path . $dest_path)) {
-                    $imagequery = "INSERT INTO submission_files_hackathon2021(submission_id, uid, filename, filepath, filemime, filesize, filetype, file_creation_date) VALUES
-                          (:submission_id, :uid, :filename, :filepath, :filemime, :filesize, :filetype, :file_creation_date)";
-                    $imageargs = array(
-                        ":submission_id" => $submission_id,
-                        ":uid" => $user->uid,
-                        ":filename" => $filename,
-                        ":filepath" => $dest_path . $filename,
-                        ":filemime" => mime_content_type($root_path . $dest_path . $filename),
-                        ":filesize" => filesize($root_path . $dest_path . $filename),
-                        ":filetype" => 'S',
-                        ":file_creation_date" => time()
-                    );
-                    /* storing the row id in $result */
-                    $imageresult = db_query($imagequery, $imageargs, array(
-                        'return' => Database::RETURN_INSERT_ID
-                    ));
-                    if ($imageresult != 0) {
-                        $imageupload++;
-                    }
-                    db_delete('file_managed')->condition('fid', $attachment[$i]->fid)->execute();
-                    drupal_set_message($filename . ' uploaded successfully.', 'status');
-                } 
-                else {
-                    drupal_set_message($dest_path . $filename . t(' was having an error while uploading') , 'error');
-                }
-            }
-        }
-        if (!$result && $imageupload == 0) {
-            drupal_set_message(t("Something went wrong, please try again."), "error");
-        } 
-        else if ($imageupload != 0) {
-            drupal_set_message(t("Subcircuit files are added successfully"), "status");
-        }
-        foreach ($_FILES['files']['name'] as $file_form_name => $file_name)
-        {
-        if ($file_name)
-        {
-            /* checking file type */
-            //$file_type = 'S';
-            if (file_exists($root_path . $proposal_dir_path . $_FILES['files']['name'][$file_form_name]))
-            {
-                 drupal_set_message(t("Error uploading file. File !filename already exists.", array('!filename' => $_FILES['files']['name'][$file_form_name])), 'error');
-                //unlink($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
-            } //file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
-            /* uploading file */
-            if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $proposal_dir_path . $_FILES['files']['name'][$file_form_name]))
-            {
-                $query = "INSERT INTO submission_files_hackathon2021(submission_id, uid, filename, filepath, filemime, filesize, filetype, file_creation_date) VALUES
-                          (:submission_id, :uid, :filename, :filepath, :filemime, :filesize, :filetype, :file_creation_date)";
-                    $args = array(
-                        ":submission_id" => $submission_id,
-                        ":uid" => $user->uid,
-                        ":filename" => $file_name,
-                        ":filepath" => $proposal_dir_path . $file_name,
-                        ":filemime" => mime_content_type($root_path . $proposal_dir_path . $_FILES['files']['name'][$file_form_name]),
-                        ":filesize" => filesize($root_path . $proposal_dir_path . $_FILES['files']['name'][$file_form_name]),
-                        ":filetype" => 'M',
-                        ":file_creation_date" => time()
-                    );
-                
-                $updateresult = db_query($query, $args);
-                //var_dump($args);die;
-
-                drupal_set_message($file_name . ' uploaded successfully.', 'status');
-            } //move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
-            else
-            {
-                drupal_set_message('Error uploading file : ' . $dest_path . '/' . $file_name, 'error');
-            }
-        } //$file_name
-    }
-    drupal_set_message(t('Your submission is successful'), 'status');
-
-        if (!$submission_id)
-        {
-            drupal_set_message(t('Error receiving your submission. Please try again.'), 'error');
-            return;
-        }
-
-
-			   /* sending mail */
-			
-		  
-		    /*$user_data = user_load($user->uid);
-                    $to = $user_data->mail;
-		    $from=variable_get('kicad_from_email', '');
-		    $bcc=variable_get('kicad_emails', '');
-	            $cc=variable_get('kicad_cc_emails', '');
-                    $subject = "Successful upload of PSpice schematic";
-		    
-                    $email_body ="
-
-Dear ".$user_data->name.",
-
-You have uploaded the following PSpice schematic:
-File : ".$newuploadfilename."
-
-We shall review it and convert the schematic into KiCad format. You will be notified once the file is converted.
-
-Best Wishes,<br>
-".variable_get('site_name', '')." Team,<br>
-FOSSEE, IIT Bombay";
-                    
-		    send_mail_hackathon(variable_get('kicad_from_email', ''), $to, $subject,  $email_body ,$from,$bcc,$cc);
-
-                    } 
-
-		}
-		
-                } else {
-                    drupal_set_message('Error uploading file : ' . $dest_path . $newuploadfilename, 'error');
-                }
-
-
-            }
-		
-		}else{
-
-		form_set_error('description', t('Minimum 50 character and Maximum 200 character for description'));
-		return;
-		}
-		
-}
-
-if($filesupload!=0){
-drupal_set_message('File uploaded successfully. Please check your register email for more details.', 'status');
-}*/
-
-
-}
-
-
-function _latex_generate_files($submission_id)
-{
-    $submission_id = $submission_id;
-    $root_path = hackathon_submission_files_path();
-    $dir_path = $root_path . "latex/";
-    //var_dump($dir_path);die;
-    $submission_circuit_filedata = "";
-    $reference_filedata = "";
-    $eol = "\n";
-    $sep = "#";
-    $submission_q = db_query("SELECT * FROM {hackathon_literature_survey} WHERE id = :id", array(
-        ':id' => $submission_id
-    ));
-    $submission_data = $submission_q->fetchObject();
-    if (!$submission_data)
-    {
-        drupal_set_message('Invalid book specified.', 'error');
-        drupal_goto('');
-    } //!$preference_data
-    $submission_circuit_filedata = $submission_data->circuit_name . $sep . $submission_data->participant_name . $sep . $submission_data->institute . $sep . $submission_data->abstract . $sep . $submission_data->circuit_details . $eol;
-    /* check if book already generated */
-    //var_dump(file_exists($dir_path . "book_" . $submission_data->id . ".pdf"));die;
-    if (file_exists($dir_path . $submission_data->id . "_literature_survey_report.pdf"))
-    {
-        // download PDF file 
-        unlink($dir_path . $submission_data->id . "_literature_survey_report.pdf");
-    }//file_exists($dir_path . "book_" . $preference_data->id . ".pdf")
-    $circuit_diagram_q  = db_query("SELECT * FROM {hackathon_literature_survey_files} WHERE submission_id = :id and filetype = :filetype", array(
-        ':id' => $submission_data->id,
-        ':filetype' => 'C'
-    ));
-    $circuit_diagram_path = $root_path . $circuit_diagram_q->fetchObject()->filepath;
-    $waveform_q  = db_query("SELECT * FROM {hackathon_literature_survey_files} WHERE submission_id = :id and filetype = :filetype", array(
-        ':id' => $submission_data->id,
-        ':filetype' => 'W'
-    ));
-    $waveform_path = $root_path . $waveform_q->fetchObject()->filepath;
-
-    $bib_references_q  = db_query("SELECT * FROM {hackathon_literature_survey_bib_references} WHERE submission_id = :id", array(
-        ':id' => $submission_data->id,
-    ));
-        /*while ($submission_files_data = $submission_files_q->fetchObject())
-        {
-                $reference_filedata .= $submission_files_data->filename . $sep;
-                $reference_filedata .= $submission_files_data->filepath . $sep;
-                $reference_filedata .= $submission_files_data->filetype . $sep;
-                $reference_filedata .= $sep;
-                $reference_filedata .= $submission_files_data->id;
-                $reference_filedata .= $eol;
-        }*/ //$example_data = $example_q->fetchObject()
-    /********************* Write to tex file ***********************/
-    $special_chars = array("_", "&", "%", "#", "{", "}", "^");
-$replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}", "\^");
-    $bibscript = '';
-    while($bib_ref_data = $bib_references_q->fetchObject()){
-        $resource_link = str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_link);
-    $bibscript .= '@MISC{' . $bib_ref_data->id . ', author={' . str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_author) . '}, title={' . str_replace($special_chars, $replace_special_chars, $bib_ref_data->resource_title) . '}, howpublished={' . $resource_link . '}}' . $eol;
-}
-
-$circuit_details = str_replace($special_chars, $replace_special_chars, $submission_data->circuit_details);
-$abstract = str_replace($special_chars, $replace_special_chars, $submission_data->abstract);
-$circuit_name = str_replace($special_chars, $replace_special_chars, $submission_data->circuit_name);
-$participant_name = str_replace($special_chars, $replace_special_chars, $submission_data->participant_name);
-$participant_institute = str_replace($special_chars, $replace_special_chars, $submission_data->institute);
-
-$bib_fn="references.bib";
-$bib_file = fopen($dir_path . $bib_fn, "w");
-fwrite($bib_file, $bibscript);
-fclose($bib_file);
-
-
-    $texscript = '
-\documentclass[10pt,twocolumn,letterpaper]{article}
-%%
-%   Template taken from Overleaf
-%   Fill in details where prompted
-%
-%% Language and font encodings
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-%\usepackage{url}
-%% Sets page size and margins
-\usepackage[a4paper,top=1cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
-\usepackage{float}
-%% Useful packages
-\usepackage{amsmath}
-\usepackage{graphicx}
-%\usepackage[backend=bibtex]{biblatex}
-%\usepackage{ieee}
-%\usepackage[colorinlistoftodos]{todonotes}
-%\usepackage[colorlinks=true, allcolors=blue]{hyperref}
-%\usepackage{underscore}
-
-\title{ ' . $circuit_name . ' }
-
-\usepackage{authblk}
-\author[1]{' . $participant_name . ', ' . $participant_institute . '}
-
-\begin{document}
-\maketitle
-
-\selectlanguage{english}
-\begin{abstract}
-' . $abstract . '
-\end{abstract}
-
-
-\section{Reference Circuit Details}
-
-' . $circuit_details . '
-
-\section{Reference Circuit}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.4\textwidth]{'. $circuit_diagram_path .'}
-\caption{\label{fig:RefCktDiagram} Reference circuit diagram.}
-%~\cite{001}}
-\end{figure}
-
-\section{Reference Circuit Waveforms}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.4\textwidth]{' . $waveform_path . '}
-\caption{\label{fig:RefWaveform}Reference waveform.}
-%~\cite{6556063}}
-\end{figure}
-
-\nocite{*}
-
-\bibliographystyle{ieee}
-%\addbibresource{references.bib}
-\bibliography{references}
-
-\end{document}';
-
-//write code to file
-$fn=$submission_data->id . "_literature_survey_report.tex";
-$myfile = fopen($dir_path . $fn, "w");
-fwrite($myfile, $texscript);
-fclose($myfile);
-
-chdir("esim_uploads/hackathon_submission_uploads");
-chdir("latex");
-$ref_fn = $submission_data->id . "_literature_survey_report";
-
-$sh_command = "/bin/bash pdf_creator.sh " . $fn . " " . $ref_fn;
-exec($sh_command);
-$download_filename = $submission_data->id . "_literature_survey_report.pdf";
-
-if (filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf") == TRUE)
-        {
-            ob_clean();
-            header("Pragma: public");
-            header("Expires: 0");
-            header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-            header("Cache-Control: public");
-            header("Content-Description: File Transfer");
-            header('Content-Type: application/pdf');
-            header('Content-disposition: attachment; filename=' . $download_filename);
-            header('Content-Length: ' . filesize($dir_path . $submission_data->id . "_literature_survey_report.pdf"));
-            header("Content-Transfer-Encoding: binary");
-            header('Expires: 0');
-            header('Pragma: no-cache');
-            @readfile($dir_path . $submission_data->id . "_literature_survey_report.pdf");
-            ob_end_flush();
-            ob_clean();
-            flush();
-        } //filesize($dir_path . $pdf_filename) == TRUE
-        else
-        {
-            drupal_set_message("Error occurred when generating the PDF version of the report.", 'error');
-            drupal_goto('');
-        }
-    
-}
-
 function hackathon_submission_files_path() {
   return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'esim_uploads/hackathon_submission_uploads/';
 }
@@ -1010,6 +508,14 @@ function _hs_dir_name($circuit_name, $participant_name)
     $dir_name = $circuit_name . ' By ' . $participant_name;
     $directory_name = str_replace("__", "_", str_replace(" ", "_", str_replace("/","_", trim($dir_name))));
     return $directory_name;
+}
+
+function hs_convert_special_characters($string){
+    $string_to_replace = $string;
+    $special_chars = array("_", "&", "%", "#", "{", "}", "^", "µ","̊", "±", "ω", "π", "Σ", "Ω", "ρ", "λ", "φ","α","β", "∆", "∑");
+    $replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}", "\^", "$\mu$", "$^{\circ}$", "$\pm$", "$\omega$", "$\pi$", "$\sigma$", "$\Omega$", '$\rho$', "$\lambda$", '$\varphi$', "$\alpha$", "$\beta$", "$\Delta$", "$\Sigma$");
+    $final_string = str_replace($special_chars, $replace_special_chars, $string_to_replace);
+    return $final_string;
 }
 
 function hs_ucname($string)
