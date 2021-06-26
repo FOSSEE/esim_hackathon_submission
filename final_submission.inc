@@ -42,7 +42,7 @@ function add_project_files_submission(){
     global $user;
     if ($user->uid == 0)
     {
-        $msg = drupal_set_message(t('It is mandatory to log in on this website to upload your submission. If you are new user please create a new account first.'), 'error');
+        $msg = drupal_set_message(t('It is mandatory to log in on this website to upload your project files. If you are new user please create a new account first.'), 'error');
         //drupal_goto('esim-circuit-simulation-project');
         drupal_goto('user/login', array('query' => drupal_get_destination()));
         return $msg;
@@ -61,7 +61,7 @@ function add_project_files_submission(){
     $last_date = "2021-06-30 23:59:59.0";
     $return_html = '';
     if($today < $start_date){
-        $return_html .= '<p>You can upload your project files at anytime between 28-06-2021, 12 AM and 30-06-2021, 23:59 PM.</p>';
+        $return_html .= '<p>You can upload your project files anytime between 28-06-2021, 12 AM and 30-06-2021, 23:59 PM.</p>';
     }
     elseif($today > $last_date){
         $return_html .= '<p>Submissions are closed.</p>';
@@ -1142,7 +1142,7 @@ function hackathon_submission_add_project_files_form($form, $form_state, $no_js_
     $project_files_data = $proposal_q->fetchObject();
     if ($project_files_data)
     {
-            drupal_set_message(t('We have already received your project files.'), 'status');
+            drupal_set_message(t('We have already received your project files. Use the edit project files option below to modify/update your project files'), 'status');
             drupal_goto('hackathon-submission/proposed');
             return;
     } //$proposal_data
