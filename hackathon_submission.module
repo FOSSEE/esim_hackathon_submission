@@ -508,7 +508,7 @@ function hackathon_submission_display_final_submissions()
         $query->orderBy('id', 'DESC');
         $final_submissions_q = $query->execute();
         $final_submission_data = $final_submissions_q->fetchObject();
-        $action =  l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id);  
+        $action =  l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $my_submissions_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id);  
         $my_submission_rows[$my_submissions_data->id] = array(
             date('d-m-Y', $my_submissions_data->creation_date),
             l($final_submission_data->participant_name, 'user/' . $final_submission_data->uid),
