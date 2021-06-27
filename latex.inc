@@ -15,7 +15,7 @@ function download_literature_survey_report()
     $submission_data = $submission_q->fetchObject();
     if (!$submission_data)
     {
-        drupal_set_message('Invalid book specified.', 'error');
+        drupal_set_message('Invalid submission specified.', 'error');
         drupal_goto('');
     } //!$preference_data
     $submission_circuit_filedata = $submission_data->circuit_name . $sep . $submission_data->participant_name . $sep . $submission_data->institute . $sep . $submission_data->abstract . $sep . $submission_data->circuit_details . $eol;
@@ -198,7 +198,7 @@ function download_final_submission_report()
     $submission_data = $submission_q->fetchObject();
     if (!$final_submission_data)
     {
-        drupal_set_message('Invalid book specified.', 'error');
+        drupal_set_message('Invalid submission specified.', 'error');
         drupal_goto('');
     } //!$preference_data
     //$final_submission_circuit_filedata = $submission_data->circuit_name . $sep . $final_submission_data->participant_name . $sep . $final_submission_data->institute . $sep . $final_submission_data->abstract . $sep . $final_submission_data->circuit_details . $eol;

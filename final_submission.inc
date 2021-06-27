@@ -18,7 +18,7 @@ function add_final_submission_report_submission(){
     if($literature_submission_data){
     $today = date("Y-m-d H:i:s");
     //var_dump($today);die;
-    $start_date = "2021-06-28 23:59:59.0"; 
+    $start_date = "2021-06-27 23:59:59.0"; 
     $last_date = "2021-06-30 23:59:59.0";
     $return_html = '';
     if($today < $start_date){
@@ -57,7 +57,7 @@ function add_project_files_submission(){
     if($literature_submission_data){
     $today = date("Y-m-d H:i:s");
     //var_dump($today);die;
-    $start_date = "2021-06-28 23:59:59.0"; 
+    $start_date = "2021-06-27 23:59:59.0"; 
     $last_date = "2021-06-30 23:59:59.0";
     $return_html = '';
     if($today < $start_date){

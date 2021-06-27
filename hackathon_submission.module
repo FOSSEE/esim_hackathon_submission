@@ -41,11 +41,36 @@ function hackathon_submission_menu()
     );
     $items["hackathon-submission/all-submissions"] = array(
         "title" => "List of all submissions",
+        "page callback" => "hackathon_submission_display_final_submissions",
+        "access arguments" => array(
+            "manage hackathon_submission"
+        ),
+    );
+    $items["hackathon-submission/all-submissions/literature-survey"] = array(
+        "title" => "List of all Literature survey submissions",
         "page callback" => "hackathon_submission_display_all_submissions",
         "access arguments" => array(
             "manage hackathon_submission"
         ),
-        "type" => MENU_CALLBACK
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 1
+    );
+    $items["hackathon-submission/all-submissions/final-reports"] = array(
+        "title" => "List of all Final submissions",
+        "page callback" => "hackathon_submission_display_final_submissions",
+        "access arguments" => array(
+            "manage hackathon_submission"
+        ),
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => 0
+    );
+    $items["hackathon-submission/view-details/final-submission"] = array(
+        "title" => "View submission details",
+        'page callback' => 'drupal_get_form',
+        "page arguments" => array("hackathon_submission_view_final_submissions_details_form"),
+        "access arguments" => array(
+            "manage hackathon_submission"
+        ),
     );
     $items["hackathon-submission/download-emails"] = array(
         "title" => "List of all submissions",
@@ -427,7 +452,7 @@ function hackathon_submission_display_all_submissions()
         $query->orderBy('id', 'DESC');
         $final_submissions_q = $query->execute();
         $final_submission_data = $final_submissions_q->fetchObject();
-        $action =   l('Download Literature Survey Report', 'hackathon-submission/generate-report/literature-survey/' . $my_submissions_data->id) . ' | ' . l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id);  
+        $action =   l('Download Literature Survey Report', 'hackathon-submission/generate-report/literature-survey/' . $my_submissions_data->id);  
         $my_submission_rows[$my_submissions_data->id] = array(
             date('d-m-Y', $my_submissions_data->creation_date),
             l($my_submissions_data->participant_name, 'user/' . $my_submissions_data->uid),
@@ -454,6 +479,111 @@ function hackathon_submission_display_all_submissions()
     ));
     return $output;
 }
+
+function hackathon_submission_display_final_submissions()
+{
+    global $user;
+    /* get pending submissions to be approved */
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to login on this website to view all submissions. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('/pssp');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    }
+    $my_submission_rows = array();
+    $query = db_select('hackathon_final_submission');
+    $query->fields('hackathon_final_submission');
+    //$query->condition('approval_status', 2);
+    //$query->condition('uid',$user->uid);
+    $query->orderBy('id', 'DESC');
+    $my_submissions_q = $query->execute();
+    $output = "<p>Total number of submissions: " . $my_submissions_q->rowCount();
+    while ($my_submissions_data = $my_submissions_q->fetchObject())
+    {
+        $query = db_select('hackathon_literature_survey');
+        $query->fields('hackathon_literature_survey');
+        //$query->condition('approval_status', 2);
+        $query->condition('id',$my_submissions_data->literature_survey_id);
+        $query->orderBy('id', 'DESC');
+        $final_submissions_q = $query->execute();
+        $final_submission_data = $final_submissions_q->fetchObject();
+        $action =  l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $my_submissions_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id);  
+        $my_submission_rows[$my_submissions_data->id] = array(
+            date('d-m-Y', $my_submissions_data->creation_date),
+            l($final_submission_data->participant_name, 'user/' . $final_submission_data->uid),
+            $final_submission_data->circuit_name,
+            $action
+        );
+    } //$pending_data = $pending_q->fetchObject()
+    /* check if there are any pending submissions */
+    if (!$my_submission_rows)
+    {
+        drupal_set_message(t('You do not have any active submissions. To submit, click ') . l('here', 'hackathon-submission/add/literature-report'), 'status');
+        return '';
+    } //!$pending_rows
+    $my_submission_header = array(
+        'Date of Submission',
+        'Name',
+        'Circuit Name',
+        ''
+    );
+    //$output = theme_table($pending_header, $pending_rows);
+    $output .= theme('table', array(
+        'header' => $my_submission_header,
+        'rows' => $my_submission_rows
+    ));
+    return $output;
+}
+
+
+function hackathon_submission_view_final_submissions_details_form($form, &$form_state)
+{
+    global $user;
+    /* get current proposal */
+    $submission_id = (int) arg(3);
+    $submission_q = db_query("SELECT * FROM {hackathon_literature_survey} WHERE id = :id", array(
+        ':id' => $submission_id
+    ));
+    $submission_data = $submission_q->fetchObject();
+    $final_submission_q = db_query("SELECT * FROM {hackathon_final_submission} WHERE literature_survey_id = :literature_survey_id", array(
+        ':literature_survey_id' => $submission_id
+    ));
+    $final_submission_data = $final_submission_q->fetchObject();
+
+    $form['contributor_name'] = array(
+        '#type' => 'item',
+        '#markup' => $submission_data->participant_name,
+        '#title' => t('Student name')
+    );
+    $form['student_email_id'] = array(
+        '#title' => t('Student Email'),
+        '#type' => 'item',
+        '#markup' => $submission_data->participant_email,
+        '#title' => t('Email')
+    );
+    $form['university'] = array(
+        '#type' => 'item',
+        '#markup' => $submission_data->institute,
+        '#title' => t('Institute')
+    );
+    $form['abstract'] = array(
+        '#type' => 'item',
+        '#markup' => $final_submission_data->abstract,
+        '#title' => t('Abstract')
+    );
+    $form['circuit_details'] = array(
+        '#type' => 'item',
+        '#markup' => $final_submission_data->circuit_details,
+        '#title' => t('Circuit Details')
+    );
+    $form['cancel'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('Cancel'), 'hackathon-submission/all-submissions')
+    );
+    return $form;
+}
+
 
 function hackathon_submission_download_emails(){
     global $user;
