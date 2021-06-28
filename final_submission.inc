@@ -336,14 +336,14 @@ function add_final_submission_report_submission_form_validate($form, &$form_stat
         }
         //var_dump($form_state['values']['abstract']);die;
         //var_dump(preg_match_all('/[\^%&()#.:_+]/',$form_state['values']['abstract'], $out) ? $out[0] : 'no match');die;
-    if(!hs_check_special_characters($form_state['values']['abstract']))
+    /*if(!hs_check_special_characters($form_state['values']['abstract']))
     {
         form_set_error('abstract', t('Only alphanumeric values are allowed. Please remove other characters in your abstract'));
     }
     if(!hs_check_special_characters($form_state['values']['circuit_details']))
     {
         form_set_error('circuit_details', t('Only alphanumeric values are allowed. Please remove other characters in your circuit details'));
-    }
+    }*/
     if (isset($_FILES['files']))
     {
         /* check if atleast one source or result file is uploaded */
@@ -854,14 +854,14 @@ function edit_final_submission_form_validate($form, &$form_state){
         {
             form_set_error('circuit_details', t('Minimum charater limit for circuit details is 1334 charaters'));
         }
-    if(!hs_check_special_characters($form_state['values']['abstract']))
+    /*if(!hs_check_special_characters($form_state['values']['abstract']))
     {
         form_set_error('abstract', t('Only alphanumeric values are allowed. Please remove other characters in your abstract'));
     }
     if(!hs_check_special_characters($form_state['values']['circuit_details']))
     {
         form_set_error('circuit_details', t('Only alphanumeric values are allowed. Please remove other characters in your circuit details'));
-    }
+    }*/
     if (isset($_FILES['files']))
     {
         /* check if atleast one source or result file is uploaded */
