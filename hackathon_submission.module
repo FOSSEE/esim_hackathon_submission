@@ -365,10 +365,17 @@ function hackathon_submission_display_my_submissions()
         $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_last_date->literature_survey_id);  
     }
     else{
-    $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Final Report', 'hackathon-submission/edit/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Project files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
+        if(!$final_submission_data){
+            $action =   l('Add Final Submission', 'hackathon-submission/add/final-submission') . ' | ' . l('Edit Project files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
+            $creation_date = "Final Submission not received";
+        }
+        else{
+            $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Final Report', 'hackathon-submission/edit/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Project files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
+            $creation_date = date('d-m-Y', $final_submission_data->creation_date);
+        }
     }
     $final_submission_rows[$final_submission_data->id] = array(
-        date('d-m-Y', $final_submission_data->creation_date),
+        $creation_date,
         l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
         $my_proposals_data->circuit_name,
         $action

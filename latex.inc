@@ -292,11 +292,11 @@ fclose($bib_file);
 \end{abstract}
 
 
-\section{Reference Circuit Details}
+\section{Circuit Details}
 
 ' . $circuit_details . '
 
-\section{Reference Circuit}
+\section{Implemented Circuit}
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{'. $circuit_diagram_path .'}
@@ -304,7 +304,7 @@ fclose($bib_file);
 %~\cite{001}}
 \end{figure}
 
-\section{Reference Circuit Waveforms}
+\section{Implemented Waveforms}
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{' . $waveform_path . '}
