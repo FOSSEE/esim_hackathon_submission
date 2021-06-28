@@ -644,7 +644,7 @@ function edit_final_submission_form($form, $form_state, $no_js_use = FALSE){
     );    
     $form['reference_files'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Upload Reference Files'),
+        '#title' => t('Upload Implemented Files'),
         '#collapsible' => FALSE,
         '#collapsed' => FALSE
     );
@@ -658,7 +658,7 @@ function edit_final_submission_form($form, $form_state, $no_js_use = FALSE){
     }
     $form['reference_files']['reference_circuit'] = array(
         '#type' => 'file',
-        '#title' => t('Upload reference circuit'),
+        '#title' => t('Upload Implemented circuit'),
         '#size' => 48,
         '#upload_validators' => array(
                 'file_validate_extensions' => array(variable_get('reference_circuit_extensions', '')),
@@ -675,7 +675,7 @@ function edit_final_submission_form($form, $form_state, $no_js_use = FALSE){
     }
     $form['reference_files']['reference_waveform'] = array(
         '#type' => 'file',
-        '#title' => t('Upload reference waveform'),
+        '#title' => t('Upload Implemented waveform'),
         '#size' => 48,
         '#upload_validators' => array(
                 'file_validate_extensions' => array(variable_get('reference_circuit_extensions', '')),
