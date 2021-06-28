@@ -653,7 +653,7 @@ function _hs_dir_name($circuit_name, $participant_name)
 
 function hs_convert_special_characters($string){
     $string_to_replace = $string;
-    $special_chars = array("_", "&", "%", "#", "{", "}", "^", "µ","̊", "±", "ω", "π", "Σ", "Ω", "ρ", "λ", "φ","α","β", "∆", "∑");
+    $special_chars = array("_", "&", "%", "#", "{", "}", "^", "μ","̊", "±", "ω", "π", "Σ", "Ω", "ρ", "λ", "φ","α","β", "∆", "∑");
     $replace_special_chars = array("\_", "\&", "\%", "\#", "\{", "\}", "\^", "$\mu$", "$^{\circ}$", "$\pm$", "$\omega$", "$\pi$", "$\sigma$", "$\Omega$", '$\rho$', "$\lambda$", '$\varphi$', "$\alpha$", "$\beta$", "$\Delta$", "$\Sigma$");
     $final_string = str_replace($special_chars, $replace_special_chars, $string_to_replace);
     return $final_string;
