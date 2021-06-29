@@ -80,15 +80,15 @@ function hackathon_submission_menu()
         ),
         "type" => MENU_CALLBACK
     );
-     $items["hackathon-submission/description"] = array(
-            "title" => "More Details",
-            "page callback" => "hackathon_submission_get_description",
-            "access arguments" => array(
-                "access hackathon_submission"
-            ),
-            "type" => MENU_CALLBACK
-        );
-     $items['hackathon-submission/generate-report/literature-survey'] = array(
+    /*$items['hackathon-submission/download/file'] = array(
+        'title' => 'File Download',
+        'description' => 'File Download', 
+        'page callback' => 'hackathon_submission_download_file',
+        'access arguments' => array("access hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        
+    );*/
+    $items['hackathon-submission/generate-report/literature-survey'] = array(
             'title' => 'Generate Literature Survey Report',
             'description' => 'Generate Literature Survey Report',
             'page callback' => 'download_literature_survey_report',
@@ -97,7 +97,7 @@ function hackathon_submission_menu()
             ),
             'type' => MENU_CALLBACK,
             'file' => 'latex.inc'
-        );
+    );
      $items['hackathon-submission/generate-report/final-submission'] = array(
         'title' => 'Generate Final Submission Report',
         'description' => 'Generate Final Submission Report',
@@ -108,30 +108,6 @@ function hackathon_submission_menu()
         'type' => MENU_CALLBACK,
         'file' => 'latex.inc'
     );
-    $items["hackathon-submission/descriptioninfo"] = array(
-            "title" => "File Details",
-            "page callback" => "hackathon_submission_get_descriptioninfo",
-            "access arguments" => array(
-               "convert hackathon_submission"
-            ),
-            "type" => MENU_CALLBACK
-        );
-        $items['hackathon-submission/download/file'] = array(
-        'title' => 'File Download',
-        'description' => 'File Download', 
-        'page callback' => 'hackathon_submission_download_file',
-        'access arguments' => array("access hackathon_submission"),
-        'type' => MENU_CALLBACK,
-        
-      );
-      $items['hackathon-submission/download/pdf'] = array(
-        'title' => 'Description PDF File Download',
-        'description' => 'Description PDF File Download', 
-        'page callback' => 'hackathon_submission_download_pdf_file',
-        'access arguments' => array("access hackathon_submission"),
-        'type' => MENU_CALLBACK,
-        
-      );
     $items["hackathon-submission/add/literature-report"] = array(
         "title" => "CSMD submission",
         "page callback" => 'add_literature_report_submission',
@@ -204,68 +180,7 @@ function hackathon_submission_menu()
         "type" => MENU_CALLBACK,
         'file' => 'final_submission.inc'
     );
-	$items["hackathon-submission/your-upload"] = array(
-        "title" => "LIST OF FILES UPLOADED BY USER",
-        "page callback" => "hackathon_submission_your_uploaded_file",
-        "access arguments" => array(
-            "manage hackathon_submission"
-        ),
-        "type" => MENU_CALLBACK
-    );
-
-   $items["hackathon-submission/convert"] = array(
-        "title" => "FILES TO BE CONVERTED",
-        "page callback" => "hackathon_submission_remain_list",
-        "access arguments" => array(
-            "convert hackathon_submission"
-        ),
-        "type" => MENU_CALLBACK
-    );
-
-$items['hackathon-submission/download/pspicefile'] = array(
-    'title' => 'Pspice File Download',
-    'description' => 'Pspice File Download', 
-    'page callback' => 'hackathon_submission_download_pspice_file',
-    'access arguments' => array("convert hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
- $items['hackathon-submission/convert/file'] = array(
-    'title' => 'Convert Files',
-    'description' => 'Convert Files', 
-    'page callback' => 'hackathon_submission_convert_file',
-    'access arguments' => array("convert hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
-$items['hackathon-submission/delete/file'] = array(
-    'title' => 'Delete File',
-    'description' => 'Delete File', 
-    'page callback' => 'hackathon_submission_delete_file',
-    'access arguments' => array("convert hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
-
-$items['hackathon-submission/convert/approved'] = array(
-    'title' => 'Convert Files',
-    'description' => 'Convert Files', 
-    'page callback' => 'hackathon_submission_convert_approved',
-    'access arguments' => array("convert hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
-
-$items['hackathon-submission/convert/upload'] = array(
-    'title' => 'Upload Corrected Zip',
-    'description' => 'Convert Files', 
-    'page callback' => 'hackathon_submission_convert_upload',
-    'access arguments' => array("convert hackathon_submission"),
-    'type' => MENU_CALLBACK,
-    
-  );
-
-      /* ADMIN SETTINGS */
+    /* ADMIN SETTINGS */
     $items['admin/settings/hackathon-submission'] = array(
         'title' => 'Hackathon submission Settings',
         'description' => 'Hackathon submission Settings',
