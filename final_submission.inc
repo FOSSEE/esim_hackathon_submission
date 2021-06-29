@@ -1009,7 +1009,7 @@ function edit_final_submission_form_submit($form, $form_state){
                     /* uploading file */
                     else if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
                     {
-                        $query_ab_f = "SELECT * FROM hackathon_final_submission_files WHERE final_submission_id = :final_final_submission_id AND filetype = 
+                        $query_ab_f = "SELECT * FROM hackathon_final_submission_files WHERE final_submission_id = :final_submission_id AND filetype = 
                 :filetype";
                         $args_ab_f = array(
                             ":final_submission_id" => $final_submission_id,
