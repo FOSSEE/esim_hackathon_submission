@@ -300,7 +300,7 @@ fclose($bib_file);
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{'. $circuit_diagram_path .'}
-\caption{\label{fig:RefCktDiagram} Reference circuit diagram.}
+\caption{\label{fig:RefCktDiagram} Implemented circuit diagram.}
 %~\cite{001}}
 \end{figure}
 
@@ -308,7 +308,7 @@ fclose($bib_file);
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{' . $waveform_path . '}
-\caption{\label{fig:RefWaveform}Reference waveform.}
+\caption{\label{fig:RefWaveform}Implemented waveform.}
 %~\cite{6556063}}
 \end{figure}
 
