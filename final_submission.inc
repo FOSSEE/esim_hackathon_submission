@@ -940,7 +940,7 @@ function edit_final_submission_form_submit($form, $form_state){
     $proposal_q = $query->execute();
     $proposal_data = $proposal_q->fetchObject();
     $proposal_dir_path = $proposal_data->directory_name . '/';
-    $dest_path1 = $proposal_dir_path . 'literature_survey/';
+    $dest_path1 = $proposal_dir_path . 'final_submission_files/';
     $dest_path = $dest_path1 . 'reference_files/';
     $bib_reference_upload = 0;
             for ($i = 0; $i < 3; $i++) {
