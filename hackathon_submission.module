@@ -277,7 +277,7 @@ function hackathon_submission_display_my_submissions()
        $output .= l('Edit Project Files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
     }*/
     if($today > $final_submission_last_date){
-        $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_last_date->id);  
+        $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id);  
         $creation_date = date('d-m-Y', $final_submission_data->creation_date);
     }
     else{
