@@ -278,6 +278,7 @@ function hackathon_submission_display_my_submissions()
     }*/
     if($today > $final_submission_last_date){
         $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_last_date->id);  
+        $creation_date = date('d-m-Y', $final_submission_data->creation_date);
     }
     else{
         if(!$final_submission_data){
