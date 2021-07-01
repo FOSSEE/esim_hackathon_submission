@@ -91,7 +91,7 @@ function hackathon_submission_menu()
     $items['hackathon-submission/download/all-files'] = array(
         'title' => 'Download All Files',
         'description' => 'Download All Files', 
-        'page callback' => 'hackathon_submission_download_all_files',
+        'page callback' => 'create_zip_of_all_files',
         'access arguments' => array("manage hackathon_submission"),
         'type' => MENU_CALLBACK,
         
@@ -439,7 +439,7 @@ function hackathon_submission_display_final_submissions()
         $query->orderBy('id', 'DESC');
         $final_submissions_q = $query->execute();
         $final_submission_data = $final_submissions_q->fetchObject();
-        $action =  l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $my_submissions_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id) . ' | ' . l('Download All Files', 'hackathon-submission/download/all-files/' . $final_submission_data->id);  
+        $action =  l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $my_submissions_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id) . ' | ' . l('Download Project Files', 'hackathon-submission/download/project-files/' . $final_submission_data->id);  
         $my_submission_rows[$my_submissions_data->id] = array(
             date('d-m-Y', $my_submissions_data->creation_date),
             l($final_submission_data->participant_name, 'user/' . $final_submission_data->uid),
@@ -582,73 +582,17 @@ function hackathon_submission_download_project_files()
     $submission_q = $query->execute();
     $submission_data = $submission_q->fetchObject();
     $directory_path = $submission_data->directory_name . '/';
-    /* zip filename */
-    $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
-    /* creating zip archive on the server */
-    $zip = new ZipArchive();
-    $zip->open($zip_filename, ZipArchive::CREATE);
-    $query = db_select('hackathon_final_submission_project_files');
-    $query->fields('hackathon_final_submission_project_files');
-    $query->condition('literature_submission_id', $submission_id);
-    $project_files_q = $query->execute();
-    while ($esim_project_files = $project_files_q->fetchObject()) {
-        $zip->addFile($root_path . $esim_project_files->filepath, $directory_path . str_replace(' ', '_', basename($esim_project_files->filename)));
-    }
-    $zip_file_count = $zip->numFiles;
-    $zip->close();
-    if ($zip_file_count > 0) {
-        if ($user->uid) {
-            /* download zip file */
-            header('Content-Type: application/zip');
-            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->circuit_name) . '.zip"');
-            header('Content-Length: ' . filesize($zip_filename));
-            ob_clean();
-            readfile($zip_filename);
-            unlink($zip_filename);
-            /*flush();
-            ob_end_flush();
-            ob_clean();*/
-            
-        } //$user->uid
-        else {
-            header('Content-Type: application/zip');
-            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->circuit_name) . '.zip"');
-            header('Content-Length: ' . filesize($zip_filename));
-            header("Content-Transfer-Encoding: binary");
-            header('Expires: 0');
-            header('Pragma: no-cache');
-            //ob_end_flush();
-            ob_clean();
-            //flush();
-            readfile($zip_filename);
-            unlink($zip_filename);
-        }
-    } //$zip_file_count > 0
-    else {
-        drupal_set_message("There are no files in this circuit to download", 'error');
-        drupal_goto('hackathon-submission/all-submissions');
-    }
-}
-
-function hackathon_submission_download_all_files()
-{
-    global $user;
-    $submission_id = arg(3);
-    $root_path = hackathon_submission_files_path();
-    //var_dump($root_path);die;
-    $query = db_select('hackathon_literature_survey');
-    $query->fields('hackathon_literature_survey');
-    $query->condition('id', $submission_id);
-    $submission_q = $query->execute();
-    $submission_data = $submission_q->fetchObject();
-    $directory_path = $submission_data->directory_name . '/';
     $query = db_select('hackathon_final_submission');
     $query->fields('hackathon_final_submission');
     $query->condition('literature_survey_id', $submission_id);
     $final_submission_q = $query->execute();
     $final_submission_data = $final_submission_q->fetchObject();
     /* zip filename */
-    $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
+    $zip_files_path = 'zip_files/';
+    //var_dump($root_path . $zip_files_path);die;
+    if (!is_dir($root_path . $zip_files_path))
+            mkdir($root_path . $zip_files_path);
+    $zip_filename = $root_path . $zip_files_path . $submission_data->id . '.zip';
     /* creating zip archive on the server */
     $zip = new ZipArchive();
     $zip->open($zip_filename, ZipArchive::CREATE);
@@ -675,7 +619,7 @@ function hackathon_submission_download_all_files()
         if ($user->uid) {
             /* download zip file */
             header('Content-Type: application/zip');
-            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->circuit_name) . '.zip"');
+            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->id) . '.zip"');
             header('Content-Length: ' . filesize($zip_filename));
             ob_clean();
             readfile($zip_filename);
@@ -687,7 +631,7 @@ function hackathon_submission_download_all_files()
         } //$user->uid
         else {
             header('Content-Type: application/zip');
-            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->circuit_name) . '.zip"');
+            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->id) . '.zip"');
             header('Content-Length: ' . filesize($zip_filename));
             header("Content-Transfer-Encoding: binary");
             header('Expires: 0');
@@ -696,13 +640,124 @@ function hackathon_submission_download_all_files()
             ob_clean();
             //flush();
             readfile($zip_filename);
-            unlink($zip_filename);
+            //unlink($zip_filename);
         }
     } //$zip_file_count > 0
     else {
         drupal_set_message("There are no files in this circuit to download", 'error');
         drupal_goto('hackathon-submission/all-submissions');
     }
+}
+
+function create_zip_of_all_files(){
+    $root_path  = hackathon_submission_files_path();
+    $query = db_query("SELECT p.literature_submission_id, l.circuit_name, l.participant_name
+            FROM hackathon_final_submission_project_files as p
+            LEFT JOIN hackathon_literature_survey as l
+            ON l.id = p.literature_submission_id where p.literature_submission_id in 
+            (select l.id from hackathon_final_submission as f
+            LEFT JOIN hackathon_literature_survey as l
+            ON l.id = f.literature_survey_id)
+            group by p.literature_submission_id
+            order by p.literature_submission_id");
+    //var_dump($query->rowCount());die;
+     $pathdir = $root_path . 'zip_files/';
+    $zipcreated = $root_path . 'Allfiles.zip';
+  //var_dump($zipcreated);die;
+// Create new zip class
+    $zip = new ZipArchive();
+    $zip->open($zipcreated, ZipArchive::CREATE);
+    while($result = $query->fetchObject()){
+        if(!file_exists($root_path . 'zip_files/' . $result->literature_submission_id . '.zip'))
+            hackathon_submission_download_all_files($result->literature_submission_id);
+        $zip->addFile($root_path . 'zip_files/' . $result->literature_submission_id . '.zip', $result->literature_submission_id . '.zip');
+    }
+   $zip ->close();
+  header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename= Allfiles.zip');
+            header('Content-Length: ' . filesize($zipcreated));
+            ob_clean();
+            readfile($zipcreated);
+    
+}
+
+function hackathon_submission_download_all_files($submission_id)
+{
+    global $user;
+    $submission_id = $submission_id;
+    $root_path = hackathon_submission_files_path();
+    //var_dump($root_path);die;
+    $query = db_select('hackathon_literature_survey');
+    $query->fields('hackathon_literature_survey');
+    $query->condition('id', $submission_id);
+    $submission_q = $query->execute();
+    $submission_data = $submission_q->fetchObject();
+    $directory_path = $submission_data->directory_name . '/';
+    $query = db_select('hackathon_final_submission');
+    $query->fields('hackathon_final_submission');
+    $query->condition('literature_survey_id', $submission_id);
+    $final_submission_q = $query->execute();
+    $final_submission_data = $final_submission_q->fetchObject();
+    /* zip filename */
+    $zip_files_path = 'zip_files/';
+    //var_dump($root_path . $zip_files_path);die;
+    if (!is_dir($root_path . $zip_files_path))
+            mkdir($root_path . $zip_files_path);
+    $zip_filename = $root_path . $zip_files_path . $submission_data->id . '.zip';
+    /* creating zip archive on the server */
+    $zip = new ZipArchive();
+    $zip->open($zip_filename, ZipArchive::CREATE);
+    $query = db_select('hackathon_final_submission_project_files');
+    $query->fields('hackathon_final_submission_project_files');
+    $query->condition('literature_submission_id', $submission_id);
+    $project_files_q = $query->execute();
+    while ($esim_project_files = $project_files_q->fetchObject()) {
+        $zip->addFile($root_path . $esim_project_files->filepath, $directory_path . str_replace(' ', '_', basename($esim_project_files->filename)));
+    }
+    $final_report = $submission_data->id . '_final_submission_report.pdf';
+    $literature_report  = $submission_data->id . '_literature_survey_report.pdf';
+    if(!file_exists($root_path . 'latex/' . $final_report)){
+        generate_fs_latex_files($final_submission_data->id);
+    }
+    if(!file_exists($root_path . 'latex/' . $literature_report)){
+        generate_ls_latex_files($submission_data->id);
+    }
+    $zip->addFile($root_path . 'latex/' . $final_report, $final_report);
+    $zip->addFile($root_path . 'latex/' . $literature_report, $literature_report);
+    $zip_file_count = $zip->numFiles;
+    $zip->close();
+    /*if ($zip_file_count > 0) {
+        if ($user->uid) {
+            /* download zip file 
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->id) . '.zip"');
+            header('Content-Length: ' . filesize($zip_filename));
+            ob_clean();
+            readfile($zip_filename);
+            //unlink($zip_filename);
+            /*flush();
+            ob_end_flush();
+            ob_clean();
+            
+        } //$user->uid
+        else {
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->id) . '.zip"');
+            header('Content-Length: ' . filesize($zip_filename));
+            header("Content-Transfer-Encoding: binary");
+            header('Expires: 0');
+            header('Pragma: no-cache');
+            //ob_end_flush();
+            ob_clean();
+            //flush();
+            readfile($zip_filename);
+            //unlink($zip_filename);
+        }
+    }*/ //$zip_file_count > 0
+   /* else {
+        drupal_set_message("There are no files in this circuit to download", 'error');
+        drupal_goto('hackathon-submission/all-submissions');
+    }*/
 }
 
 function hackathon_submission_files_path() {
