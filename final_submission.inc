@@ -18,7 +18,7 @@ function add_final_submission_report_submission(){
     if($literature_submission_data){
     $today = date("Y-m-d H:i:s");
     //var_dump($today);die;
-    $start_date = "2021-06-17 23:59:59.0"; 
+    $start_date = "2021-06-28 23:59:59.0"; 
     $last_date = "2021-06-30 23:59:59.0";
     $return_html = '';
     if($today < $start_date){
@@ -29,6 +29,45 @@ function add_final_submission_report_submission(){
     }
     else{
         $submission_form = drupal_get_form("add_final_submission_report_submission_form");
+        $return_html .= drupal_render($submission_form);
+    }
+    return $return_html;
+    }
+    else{
+        drupal_set_message('We regret to inform that we have not received your literature survey report', 'error');
+        drupal_goto('');
+    }
+}
+function add_project_files_submission(){
+    global $user;
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to log in on this website to upload your submission. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('esim-circuit-simulation-project');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    } //$user->uid == 0
+    $query = db_select('hackathon_literature_survey');
+    $query->fields('hackathon_literature_survey');
+    $query->condition('uid', $user->uid);
+    //$query->condition('id', $submission_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $literature_submission_data = $submission_q->fetchObject();
+    if($literature_submission_data){
+    $today = date("Y-m-d H:i:s");
+    //var_dump($today);die;
+    $start_date = "2021-06-28 23:59:59.0"; 
+    $last_date = "2021-06-30 23:59:59.0";
+    $return_html = '';
+    if($today < $start_date){
+        $return_html .= '<p>You can upload your project files at anytime between 28-06-2021, 12 AM and 30-06-2021, 23:59 PM.</p>';
+    }
+    elseif($today > $last_date){
+        $return_html .= '<p>Submissions are closed.</p>';
+    }
+    else{
+        $submission_form = drupal_get_form("hackathon_submission_add_project_files_form");
         $return_html .= drupal_render($submission_form);
     }
     return $return_html;
@@ -107,7 +146,7 @@ function add_final_submission_report_submission_form($form, $form_state, $no_js_
     $form['abstract'] = array(
         '#title' => t('Abstract'),
         '#type' => 'textarea',
-        '#description' => t('The abstract should contain minimum 600 characters and not exceed more than 725 characters.<p><span style="color:red">Note: </span>Only alphanumeric values are allowed in the text.</p>'),
+        '#description' => t('The abstract should contain minimum 600 characters and not exceed more than 725 characters.<p><span style="color:red">Note: </span>Only alphanumeric values are allowed in the text. Do not add symbols in your text, you may not be able to generate the PDF of the report.</p>'),
         '#rows' => 5,
         '#minlength' => 600,
         '#maxlength' => 725,
@@ -131,7 +170,7 @@ function add_final_submission_report_submission_form($form, $form_state, $no_js_
     $form['circuit_details'] = array(
         '#title' => t('Circuit Details'),
         '#type' => 'textarea',
-        '#description' => t('The circuit details should contain minimum 1334 characters and not exceed more than 1600 characters.<p><span style="color:red">Note: </span>Only alphanumeric values are allowed in the text.</p>'),
+        '#description' => t('The circuit details should contain minimum 1334 characters and not exceed more than 1600 characters.<p><span style="color:red">Note: </span>Only alphanumeric values are allowed in the text. Do not add symbols in your text, you may not be able to generate the PDF of the report.</p>'),
         '#rows' => 5,
         '#minlength' => 1334,
         '#maxlength' => 1600,
@@ -297,14 +336,14 @@ function add_final_submission_report_submission_form_validate($form, &$form_stat
         }
         //var_dump($form_state['values']['abstract']);die;
         //var_dump(preg_match_all('/[\^%&()#.:_+]/',$form_state['values']['abstract'], $out) ? $out[0] : 'no match');die;
-    /*if(!hs_check_special_characters($form_state['values']['abstract']))
+    if(!hs_check_special_characters($form_state['values']['abstract']))
     {
         form_set_error('abstract', t('Only alphanumeric values are allowed. Please remove other characters in your abstract'));
     }
     if(!hs_check_special_characters($form_state['values']['circuit_details']))
     {
         form_set_error('circuit_details', t('Only alphanumeric values are allowed. Please remove other characters in your circuit details'));
-    }*/
+    }
     if (isset($_FILES['files']))
     {
         /* check if atleast one source or result file is uploaded */
@@ -580,7 +619,7 @@ function edit_final_submission_form($form, $form_state, $no_js_use = FALSE){
     $form['abstract'] = array(
         '#title' => t('Abstract'),
         '#type' => 'textarea',
-        '#description' => t('The abstract should contain minimum 600 characters and not exceed more than 725 characters.<p><span style="color:red">Note: </span>Only alphanumeric values are allowed in the text.</p>'),
+        '#description' => t('The abstract should contain minimum 600 characters and not exceed more than 725 characters.<p><span style="color:red">Note: </span>Only alphanumeric values are allowed in the text.  Do not add symbols in your text, you may not be able to generate the PDF of the report.</p>'),
         '#rows' => 5,
         '#minlength' => 600,
         '#maxlength' => 725,
@@ -596,7 +635,7 @@ function edit_final_submission_form($form, $form_state, $no_js_use = FALSE){
     $form['circuit_details'] = array(
         '#title' => t('Circuit Details'),
         '#type' => 'textarea',
-        '#description' => t('The circuit details should contain minimum 1334 characters and not exceed more than 1600 characters.<p><span style="color:red">Note:  </span>Only alphanumeric values are allowed in the text.</p>'),
+        '#description' => t('The circuit details should contain minimum 1334 characters and not exceed more than 1600 characters.<p><span style="color:red">Note:  </span>Only alphanumeric values are allowed in the text.  Do not add symbols in your text, you may not be able to generate the PDF of the report.</p>'),
         '#rows' => 5,
         '#minlength' => 1334,
         '#maxlength' => 1600,
@@ -815,14 +854,14 @@ function edit_final_submission_form_validate($form, &$form_state){
         {
             form_set_error('circuit_details', t('Minimum charater limit for circuit details is 1334 charaters'));
         }
-    /*if(!hs_check_special_characters($form_state['values']['abstract']))
+    if(!hs_check_special_characters($form_state['values']['abstract']))
     {
         form_set_error('abstract', t('Only alphanumeric values are allowed. Please remove other characters in your abstract'));
     }
     if(!hs_check_special_characters($form_state['values']['circuit_details']))
     {
         form_set_error('circuit_details', t('Only alphanumeric values are allowed. Please remove other characters in your circuit details'));
-    }*/
+    }
     if (isset($_FILES['files']))
     {
         /* check if atleast one source or result file is uploaded */
@@ -1093,6 +1132,7 @@ function hackathon_submission_add_project_files_form($form, $form_state, $no_js_
     $query->range(0, 1);
     $proposal_q = $query->execute();
     $literature_survey_data = $proposal_q->fetchObject();
+
     $query = db_select('hackathon_final_submission_project_files');
     $query->fields('hackathon_final_submission_project_files');
     $query->condition('uid', $user->uid);
@@ -1190,7 +1230,7 @@ function hackathon_submission_add_project_files_form_validate($form, &$form_stat
                     $fnames = explode('.', strtolower($_FILES['files']['name'][$file_form_name]));
                     $temp_extension = end($fnames);
                 }
-                else if (strstr($file_form_name, 'subcircuit_files')){
+                else{
                     $file_type = 'S';
                     $fnames = explode('.', strtolower($_FILES['files']['name'][$file_form_name]));
                     $temp_extension = end($fnames);
@@ -1380,6 +1420,15 @@ function edit_project_files_form($form, $form_state, $no_js_use = FALSE){
     //$query->range(0, 1);
     $literature_submission_q = $query->execute();
     $literature_submission_data = $literature_submission_q->fetchObject();
+    $query = db_select('hackathon_final_submission_project_files');
+    $query->fields('hackathon_final_submission_project_files');
+    $query->condition('literature_submission_id', $literature_survey_id);
+    $project_files_data = $query->execute()->fetchObject();
+    if(!$project_files_data){
+        drupal_set_message('We have not yet received your project files');
+        drupal_goto('hackathon-submission/add/project-files');
+    }
+
     $form = array();
     $form['participant_name'] = array(
         '#title' => t('Participant Name'),

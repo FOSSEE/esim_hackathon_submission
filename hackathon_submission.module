@@ -107,19 +107,6 @@ function hackathon_submission_menu()
         'type' => MENU_CALLBACK,
         
       );
-
-    $items["hackathon-submission/add/project-files"] = array(
-        "title" => "Hackathon Submission Form",
-        "page callback" => "drupal_get_form",
-        "page arguments" => array(
-            "hackathon_submission_add_project_files_form"
-        ),
-        "access arguments" => array(
-            "manage hackathon_submission"
-        ),
-        "type" => MENU_CALLBACK,
-        "file" => 'final_submission.inc'
-    );
     $items["hackathon-submission/add/literature-report"] = array(
         "title" => "CSMD submission",
         "page callback" => 'add_literature_report_submission',
@@ -143,6 +130,18 @@ function hackathon_submission_menu()
         ),
         "type" => MENU_CALLBACK,
         'file' => 'final_submission.inc'
+    );
+    $items["hackathon-submission/add/project-files"] = array(
+        "title" => "Upload Project Files",
+        "page callback" => 'add_project_files_submission',
+        /*"page arguments" => array(
+            "hackathon_submission_add_project_files_form"
+        ),*/
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        "file" => 'final_submission.inc'
     );
     $items["hackathon-submission/edit/literature-report"] = array(
         "title" => "Edit CSMD submission",
@@ -269,13 +268,13 @@ function hackathon_submission_check_valid_filename($file_name) {
     return TRUE;
 }
 
-/*function hs_check_special_characters($string){
+function hs_check_special_characters($string){
     //$whiteListed = "\#\^\+\-\_\.\&()%\/";
-    if(preg_match('/[^a-zA-Z\d]/', $string))
+    if(preg_match("/\\s/", $string))
         return FALSE;
     else
         return TRUE;
-}*/
+}
 
 function hackathon_submission_upload_path() {
   return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'hackathon_submission_uploads/';
@@ -314,6 +313,10 @@ function hackathon_submission_display_my_submissions()
     $query->orderBy('id', 'DESC');
     $my_proposals_q = $query->execute();
     $my_proposals_data = $my_proposals_q->fetchObject();
+    if(!$my_proposals_data){
+        drupal_set_message('We have not received your submission', 'error');
+        drupal_goto('');
+    }
     $query = db_select('hackathon_final_submission');
     $query->fields('hackathon_final_submission');
     $query->condition('uid',$user->uid);
@@ -323,11 +326,21 @@ function hackathon_submission_display_my_submissions()
     $final_submission_data = $final_submission_q->fetchObject();
     $today = date("Y-m-d H:i:s");
     $final_submission_last_date = "2021-06-30 23:59:59.0";
+    $query = db_select('hackathon_final_submission_project_files');
+    $query->fields('hackathon_final_submission_project_files');
+    $query->condition('literature_submission_id', $submission_id);
+    $project_files_data = $query->execute()->fetchObject();
+    /*if(!$project_files_data){
+     $output .= "<p>You have not yet uploaded your project files submission.</p>";
+    }
+    else{
+       $output .= l('Edit Project Files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
+    }*/
     if($today > $final_submission_last_date){
         $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_last_date->literature_survey_id);  
     }
     else{
-    $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Final Report', 'hackathon-submission/edit/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Project Files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
+    $action =   l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Final Report', 'hackathon-submission/edit/final-submission/' . $final_submission_data->id) . ' | ' . l('Edit Project files', 'hackathon-submission/edit/project-files/' . $my_proposals_data->id);
     }
     $final_submission_rows[$final_submission_data->id] = array(
         date('d-m-Y', $final_submission_data->creation_date),
@@ -336,11 +349,7 @@ function hackathon_submission_display_my_submissions()
         $action
     );
     /* check if there are any pending proposals */
-    if (!$final_submission_rows)
-    {
-        drupal_set_message(t('You do not have any active submissions. To submit, click ') . l('here', 'hackathon-submission/add/literature-report'), 'status');
-        return '';
-    } //!$pending_rows
+     //!$pending_rows
     $final_submission_header = array(
         'Date of Submission',
         'Name',
@@ -348,10 +357,12 @@ function hackathon_submission_display_my_submissions()
         ''
     );
     //$output = theme_table($pending_header, $pending_rows);
+    
     $output .= theme('table', array(
         'header' => $final_submission_header,
         'rows' => $final_submission_rows
     ));
+    
     $output .= "<p>Literature Survey</p>";
     $my_proposal_rows = array();
     $last_date = "2021-06-21 23:59:59.0";
