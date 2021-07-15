@@ -17,9 +17,9 @@ function hackathon_submission_permission()
             "title" => t("Manage hackathon_submission Files"),
             "description" => t("Allows users to view all submissions.")
         ),
-	"convert hackathon_submission" => array(
-            "title" => t("Files to be converted"),
-            "description" => t("Allows admin to see files to be convert from pspice to kicad.")
+	"download completed circuit" => array(
+            "title" => t("Download completed circuits files"),
+            "description" => t("Allows anonymous users to download the files of completed circuits.")
         ),
     "administer hackathon_submission settings" => array(
             "title" => t("Administer hackathon settings"),
@@ -36,6 +36,14 @@ function hackathon_submission_menu()
         "page callback" => "hackathon_submission_display_my_submissions",
         "access arguments" => array(
             "access hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK
+    );
+    $items["hackathon/completed-circuits"] = array(
+        "title" => "Completed Circuits",
+        "page callback" => "hackathon_submission_completed_circuits",
+        "access arguments" => array(
+            "download completed circuit"
         ),
         "type" => MENU_CALLBACK
     );
@@ -85,6 +93,14 @@ function hackathon_submission_menu()
         'description' => 'Download Project Files', 
         'page callback' => 'hackathon_submission_download_project_files',
         'access arguments' => array("manage hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        
+    );
+    $items['hackathon-submission/download/completed-circuit'] = array(
+        'title' => 'Download Completed Circuit',
+        'description' => 'Download Completed Circuit', 
+        'page callback' => 'hackathon_submission_download_completed_circuit',
+        'access arguments' => array("download completed circuit"),
         'type' => MENU_CALLBACK,
         
     );
@@ -152,6 +168,18 @@ function hackathon_submission_menu()
         "type" => MENU_CALLBACK,
         "file" => 'final_submission.inc'
     );
+    $items["hackathon-submission/manage/edit-submission"] = array(
+        "title" => "Edit CSMD submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_submission_details_form'
+        ),
+        "access arguments" => array(
+            "manage hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
+    );
     $items["hackathon-submission/edit/literature-report"] = array(
         "title" => "Edit CSMD submission",
         "page callback" => 'drupal_get_form',
@@ -164,6 +192,7 @@ function hackathon_submission_menu()
         "type" => MENU_CALLBACK,
         'file' => 'edit_submission.inc'
     );
+
     $items["hackathon-submission/edit/final-submission"] = array(
         "title" => "Edit CSMD Final submission",
         "page callback" => 'drupal_get_form',
@@ -239,6 +268,49 @@ function hackathon_submission_convert_path() {
     $page_content = drupal_render($hackathon_submission_add_form);
     return $page_content;
 }*/
+
+function hackathon_submission_completed_circuits()
+{
+    $page_content = "";
+    $query = db_select('hackathon_completed_circuits');
+    $query->fields('hackathon_completed_circuits');
+    $result = $query->execute();
+    //var_dump($result->rowCount());die;
+    $i = 1;
+    $page_content .= "FOSSEE Project in collaboration with VLSI System Design (VSD) Corp. Pvt. Ltd and the Ministry of Education, Govt. of India conducted a 2-weeks high intensity eSim Circuit Design and Simulation Marathon using Skywater 130nm technology, a fully open source process design kit. Close to 3000+ students from all over India participated in this Marathon and close to 200+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits. More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";
+    $preference_rows = array();
+    while($row_completed_circuits = $result->fetchObject())
+    {        
+        $query_pro = db_select('hackathon_literature_survey');
+        $query_pro->fields('hackathon_literature_survey');
+        $query_pro->condition('id', $row_completed_circuits->literature_survey_id);
+        $result_pro = $query_pro->execute();
+        while ($row = $result_pro->fetchObject())
+        {
+            //$approval_date = date("Y", $row->approval_date);
+            $preference_rows[] = array(
+                $i,
+                l($row->circuit_name, 'hackathon-submission/download/completed-circuit/' . $row_completed_circuits->literature_survey_id),
+                wordwrap($row->participant_name, 10, "\n", false),
+                $row->institute,
+                //$approval_date
+            );
+            
+        } //$row = $result->fetchObject()
+        $i++;
+    }
+    $preference_header = array(
+            'No',
+            'Circuit Name',
+            'Participant Name',
+            'Institute',
+        );
+        $page_content .= theme('table', array(
+            'header' => $preference_header,
+            'rows' => $preference_rows
+        ));
+    return $page_content;
+}
 
 
 function hackathon_submission_display_my_submissions()
@@ -439,7 +511,7 @@ function hackathon_submission_display_final_submissions()
         $query->orderBy('id', 'DESC');
         $final_submissions_q = $query->execute();
         $final_submission_data = $final_submissions_q->fetchObject();
-        $action =  l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $my_submissions_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id) . ' | ' . l('Download Project Files', 'hackathon-submission/download/project-files/' . $final_submission_data->id);  
+        $action =  l('Edit submission', 'hackathon-submission/manage/edit-submission/' . $final_submission_data->id) . ' | ' . l('Download Final Report', 'hackathon-submission/generate-report/final-submission/' . $my_submissions_data->id) . ' | ' . l('View Submission Details', 'hackathon-submission/view-details/final-submission/' . $final_submission_data->id) . ' | ' . l('Download Project Files', 'hackathon-submission/download/project-files/' . $final_submission_data->id);  
         $my_submission_rows[$my_submissions_data->id] = array(
             date('d-m-Y', $my_submissions_data->creation_date),
             l($final_submission_data->participant_name, 'user/' . $final_submission_data->uid),
@@ -646,6 +718,78 @@ function hackathon_submission_download_project_files()
     else {
         drupal_set_message("There are no files in this circuit to download", 'error');
         drupal_goto('hackathon-submission/all-submissions');
+    }
+}
+
+function hackathon_submission_download_completed_circuit()
+{
+    global $user;
+    $submission_id = arg(3);
+    $root_path = hackathon_submission_files_path();
+    //var_dump($root_path);die;
+    $query = db_select('hackathon_literature_survey');
+    $query->fields('hackathon_literature_survey');
+    $query->condition('id', $submission_id);
+    $submission_q = $query->execute();
+    $submission_data = $submission_q->fetchObject();
+    $directory_path = $submission_data->directory_name . '/';
+    $query = db_select('hackathon_final_submission');
+    $query->fields('hackathon_final_submission');
+    $query->condition('literature_survey_id', $submission_id);
+    $final_submission_q = $query->execute();
+    $final_submission_data = $final_submission_q->fetchObject();
+    /* zip filename */
+    //$zip_files_path = 'zip_files/';
+    //var_dump($root_path . $zip_files_path);die;
+    /*if (!is_dir($root_path . $zip_files_path))
+            mkdir($root_path . $zip_files_path);*/
+    $zip_filename = $root_path . $submission_data->id . '.zip';
+    /* creating zip archive on the server */
+    $zip = new ZipArchive();
+    $zip->open($zip_filename, ZipArchive::CREATE);
+    $query = db_select('hackathon_final_submission_project_files');
+    $query->fields('hackathon_final_submission_project_files');
+    $query->condition('literature_submission_id', $submission_id);
+    $project_files_q = $query->execute();
+    while ($esim_project_files = $project_files_q->fetchObject()) {
+        $zip->addFile($root_path . $esim_project_files->filepath, $directory_path . str_replace(' ', '_', basename($esim_project_files->filename)));
+    }
+    $final_report = $submission_data->id . '_final_submission_report.pdf';
+    if(!file_exists($root_path . 'latex/' . $final_report)){
+        generate_fs_latex_files($final_submission_data->id);
+    }
+    $zip->addFile($root_path . 'latex/' . $final_report, $final_report);
+    $zip_file_count = $zip->numFiles;
+    $zip->close();
+    if ($zip_file_count > 0) {
+        if ($user->uid) {
+            /* download zip file */
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->circuit_name) . '.zip"');
+            header('Content-Length: ' . filesize($zip_filename));
+            ob_clean();
+            readfile($zip_filename);
+            unlink($zip_filename);
+            /*flush();
+            ob_end_flush();
+            ob_clean();*/
+            
+        } //$user->uid
+        else {
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $submission_data->circuit_name) . '.zip"');
+            header('Content-Length: ' . filesize($zip_filename));
+            header("Content-Transfer-Encoding: binary");
+            header('Expires: 0');
+            header('Pragma: no-cache');
+            ob_clean();
+            readfile($zip_filename);
+            unlink($zip_filename);
+        }
+    } //$zip_file_count > 0
+    else {
+        drupal_set_message("There are no files in this circuit to download", 'error');
+        drupal_goto('');
     }
 }
 
