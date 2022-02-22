@@ -514,7 +514,7 @@ function add_mixed_signal_marathon_literature_report_form($form, $form_state, $n
     if ($proposal_data)
     {
          drupal_set_message(t('We have already received your submission. Use the edit submission below to make changes to your submission'), 'status');
-        drupal_goto('hackathon-submission/proposed');
+        drupal_goto('mixed-signal-design-marathon/proposed');
             return;
          //$proposal_data->approval_status == 0 || $proposal_data->approval_status == 1
     }//$proposal_data
