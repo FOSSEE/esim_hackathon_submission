@@ -1450,7 +1450,7 @@ function mscd_display_literature_submissions()
     /* check if there are any pending submissions */
     if (!$my_submission_rows)
     {
-        drupal_set_message(t('You do not have any active submissions. To submit, click ') . l('here', 'hackathon-submission/add/literature-report'), 'status');
+        drupal_set_message(t('There are no active submissions yet.'), 'status');
         return '';
     } //!$pending_rows
     $my_submission_header = array(

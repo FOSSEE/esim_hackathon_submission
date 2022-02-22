@@ -565,13 +565,14 @@ function add_mixed_signal_marathon_literature_report_form($form, $form_state, $n
     );
     $form['reference_files']['literature_report'] = array(
         '#type' => 'file',
+        '#title' => t('Click <a href= "https://static.fossee.in/esim/resources/Literature-survey.pdf" target="_blank">here</a> to view the template of the file.'),
         '#size' => 48,
         '#upload_validators' => array(
                 'file_validate_extensions' => array(variable_get('mscd_literature_report_extensions', '')),
                 // Pass the maximum file size in bytes
                 'file_validate_size' => array(10*1024*1024),
               ),
-        '#description' => t('Upload a pdf file with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('mscd_literature_report_extensions', '') . '</span>'
+        '#description' => t('No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('mscd_literature_report_extensions', '') . '</span>'
     );
     $form["submit"] = array(
         "#type" => "submit",
