@@ -433,7 +433,7 @@ function add_literature_report_submission_form_submit($form, &$form_state){
                     if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
                     {
                          drupal_set_message(t("Error uploading file. File !filename already exists.", array('!filename' => $_FILES['files']['name'][$file_form_name])), 'error');
-                        //unlink($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
+                        //unlink($root_apth . $dest_path . $_FILES['files']['name'][$file_form_name]);
                     } //file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
                     /* uploading file */
                     else if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
@@ -469,4 +469,253 @@ function add_literature_report_submission_form_submit($form, &$form_state){
         }
         drupal_set_message(t('Your submission is successful'), 'status');
     drupal_goto('hackathon-submission/proposed');
+}
+
+/******************* Mixed Signal Circuit Design and Simulation Marathon submission form starts *********************/
+
+function add_mscd_literature_report_submission(){
+    global $user;
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to log in on this website to upload your submission. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('esim-circuit-simulation-project');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    } //$user->uid == 0
+    $today = date("Y-m-d H:i:s");
+    //var_dump($today);die;
+    $start_date = variable_get('mscd_literature_report_start_date', '');
+    $last_date = variable_get('mscd_literature_report_last_date', '');
+    $return_html = '';
+    //var_dump(date("d-m-Y, H:i A", strtotime($start_date)));die;
+    if($today < $start_date){
+        $return_html .= '<p>You can submit your Literature Survey report at anytime between ' . date("d-m-Y, H:i A", strtotime($start_date)) .', and ' . date("d-m-Y, H:i A", strtotime($last_date)) . '.</p>';
+    }
+    elseif($today > $last_date){
+        $return_html .= '<p>Literature Survey Submissions are closed.</p>';
+    }
+    else{
+        $submission_form = drupal_get_form("add_mixed_signal_marathon_literature_report_form");
+        $return_html .= drupal_render($submission_form);
+    }
+    return $return_html;
+}
+
+function add_mixed_signal_marathon_literature_report_form($form, $form_state, $no_js_use = FALSE)
+{
+    global $user;
+    $query = db_select('mixed_signal_marathon_literature_survey');
+    $query->fields('mixed_signal_marathon_literature_survey');
+    $query->condition('uid', $user->uid);
+    $query->orderBy('id', 'DESC');
+    $query->range(0, 1);
+    $proposal_q = $query->execute();
+    $proposal_data = $proposal_q->fetchObject();
+    if ($proposal_data)
+    {
+         drupal_set_message(t('We have already received your submission. Use the edit submission below to make changes to your submission'), 'status');
+        drupal_goto('hackathon-submission/proposed');
+            return;
+         //$proposal_data->approval_status == 0 || $proposal_data->approval_status == 1
+    }//$proposal_data
+    $form = array();
+    $form['participant_name'] = array(
+        '#title' => t('Participant Name'),
+        '#type' => 'textfield',
+        '#size' => 70,
+        '#maxlength' => 70,
+        '#required' => TRUE
+    );
+    $form['participant_email'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Email'),
+        '#size' => 30,
+        '#value' => $user->mail,
+        '#disabled' => TRUE
+    );
+    $form['institute'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name of the college/institute'),
+        '#size' => 70,
+        '#maxlength' => 70,
+        '#required' => TRUE,
+    );
+    $form['circuit_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Circuit Name'),
+        '#size' => 250,
+        '#maxlength' => 250,
+        '#required' => TRUE,
+    );
+    $form['circuit_type'] = array(
+        '#type' => 'select',
+        '#title' => t('Type of the circuit'),
+        '#options' => array(
+            'Analog' => 'Analog',
+            'Digital' => 'Digital',
+            'Mixed' => 'Mixed'
+            ),
+        '#required' => TRUE,
+    );
+    $form['reference_files'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Upload your Literature Survey Report<span style="color:red">*</span>'),
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE
+    );
+    $form['reference_files']['literature_report'] = array(
+        '#type' => 'file',
+        '#size' => 48,
+        '#upload_validators' => array(
+                'file_validate_extensions' => array(variable_get('mscd_literature_report_extensions', '')),
+                // Pass the maximum file size in bytes
+                'file_validate_size' => array(10*1024*1024),
+              ),
+        '#description' => t('Upload a pdf file with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('mscd_literature_report_extensions', '') . '</span>'
+    );
+    $form["submit"] = array(
+        "#type" => "submit",
+    '#weight' => '6',
+        "#value" => "Submit"
+    );
+    return $form;
+}
+
+function add_mixed_signal_marathon_literature_report_form_validate($form, &$form_state){
+    if(preg_match('/[\^£$%&*()}{@#~?><>.:;`|=_+¬]/', $form_state['values']['circuit_name']))
+            form_set_error('circuit_name', t('Special characters are not allowed for circuit name'));
+    if (isset($_FILES['files']))
+    {
+        /* check if atleast one source or result file is uploaded */
+        if (!($_FILES['files']['name']['literature_report']))
+            form_set_error('literature_report', t('Please upload the literature report'));
+        /* check for valid filename extensions */
+        foreach ($_FILES['files']['name'] as $file_form_name => $file_name)
+        {
+            if ($file_name)
+            {
+                /* checking file type */
+                /*if (strstr($file_form_name, 'literature_report'))
+                        $file_type = 'L';
+                $allowed_extensions_str = '';
+                switch ($file_type)
+                {
+                    case 'L':
+                        $allowed_extensions_str = variable_get('mscd_literature_report_extensions', '');
+                        break;
+                }
+                $allowed_extensions = explode(',', $allowed_extensions_str);
+                $fnames = explode('.', strtolower($_FILES['files']['name'][$file_form_name]));
+                $temp_extension = end($fnames);
+                if (!in_array($temp_extension, $allowed_extensions))
+                    form_set_error($file_form_name, t('Only file with ' . $allowed_extensions_str . ' extensions can be uploaded.'));*/
+                if ($_FILES['files']['size'][$file_form_name] <= 0)
+                    form_set_error($file_form_name, t('File size cannot be zero.'));
+                /* check if valid file name */
+                if (!hackathon_submission_check_valid_filename($_FILES['files']['name'][$file_form_name]))
+                    form_set_error($file_form_name, t('Invalid file name specified. Only alphabets and numbers are allowed as a valid filename.'));
+            } //$file_name
+        } //$_FILES['files']['name'] as $file_form_name => $file_name
+    } 
+    return $form_state;
+}
+
+function add_mixed_signal_marathon_literature_report_form_submit($form, &$form_state){
+    global $user;
+    $root_path = mscd_hackathon_submission_files_path();
+    $v = $form_state["values"];
+    $circuit_name = trim($v['circuit_name']);
+    $participant_name = $user->uid;
+    //var_dump($participant_name);die;
+    $directory_name = _hs_dir_name($circuit_name, $participant_name);
+    $result = "INSERT INTO mixed_signal_marathon_literature_survey 
+    (
+    uid, 
+    participant_name,
+    participant_email,
+    institute,
+    circuit_name, 
+    circuit_type, 
+    directory_name,
+    creation_date
+    ) VALUES
+    (
+    :uid, 
+    :participant_name, 
+    :participant_email,
+    :institute, 
+    :circuit_name, 
+    :circuit_type, 
+    :directory_name,
+    :creation_date
+    )";
+    $args = array(
+        ":uid" => $user->uid,
+        ":participant_name" => $v['participant_name'],
+        ":participant_email" => $v['participant_email'],
+        ":institute" => trim($v['institute']),
+        ":circuit_name" => $circuit_name,
+        ":circuit_type" => trim($v['circuit_type']),
+        ":directory_name" => $directory_name,
+        ":creation_date" => time()
+        );
+    //  var_dump($args);die;
+    //var_dump($result);die;
+    $submission_id = db_query($result, $args, array(
+        'return' => Database::RETURN_INSERT_ID
+    ));
+    //Adding references to db
+    $dest_path = $directory_name . '/';
+    //$dest_path = $proposal_dir_path . 'mscd_uploads/';
+    //var_dump($dest_path1);die;    
+    if (!is_dir($root_path . $proposal_dir_path))
+            mkdir($root_path . $proposal_dir_path);
+    //var_dump($root_path . $proposal_dir_path);die;
+    if (!is_dir($root_path . $dest_path))
+            mkdir($root_path . $dest_path);
+    //var_dump($root_path . $dest_path);die;
+    foreach ($_FILES['files']['name'] as $file_form_name => $file_name)
+    {
+        if ($file_name)
+        {
+            /* checking file type */
+            if (strstr($file_form_name, 'literature_report'))
+            {
+                $file_type = 'L';
+            } //strstr($file_form_name, 'upload_circuit_simulation_developed_process')
+            switch ($file_type)
+            {
+                case 'L':
+                    if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
+                    {
+                         drupal_set_message(t("Error uploading file. File !filename already exists.", array('!filename' => $_FILES['files']['name'][$file_form_name])), 'error');
+                        //unlink($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
+                    } //file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
+                    /* uploading file */
+                    else if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
+                    {
+                        $query = "UPDATE mixed_signal_marathon_literature_survey SET report_file = :report_file_name where id = :submission_id";
+                            $args = array(
+                                ":submission_id" => $submission_id,
+                                ":report_file_name" => $_FILES['files']['name'][$file_form_name],
+                            );
+                        $updateresult = db_query($query, $args);
+                        drupal_set_message($file_name . ' uploaded successfully.', 'status');
+                    } //move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
+                    else
+                    {
+                        drupal_set_message('Error uploading file : ' . $dest_path . $file_name, 'error');
+                    }
+                    break;
+            }
+
+        }
+    }
+        if (!$submission_id)
+        {
+            drupal_set_message(t('Error receiving your submission. Please try again.'), 'error');
+            return;
+        }
+        drupal_set_message(t('Your submission is successful'), 'status');
+    drupal_goto('mixed-signal-design-marathon/proposed');
 }
