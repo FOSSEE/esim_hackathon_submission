@@ -2,33 +2,33 @@
 // $Id$
 function hackathon_submission_settings_form($form, $form_state)
 {
-	/*$form['bcc_emails'] = array(
+	$form['extensions']['mscd_literature_report_extensions'] = array(
 		'#type' => 'textfield',
-		'#title' => t('(Bcc) Notification emails'),
-		'#description' => t('Specify emails id for Bcc option of mail system with comma separated'),
+		'#title' => t('Allowed file extensions for uploading MSCD Literature report'),
+		'#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('hackathon_submission_bcc_emails', '')
+		'#default_value' => variable_get('mscd_literature_report_extensions', '')
 	);
-	$form['cc_emails'] = array(
+	$form['extensions']['mscd_literature_report_start_date'] = array(
 		'#type' => 'textfield',
-		'#title' => t('(Cc) Notification emails'),
-		'#description' => t('Specify emails id for Cc option of mail system with comma separated'),
+		'#title' => t('MSCD Literature Survey start date'),
+		'#description' => t('For eg: 2022-02-28 23:59:59.0, enter in this format'),
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('hackathon_submission_cc_emails', '')
+		'#default_value' => variable_get('mscd_literature_report_start_date', '')
 	);
-	$form['from_email'] = array(
+	$form['extensions']['mscd_literature_report_last_date'] = array(
 		'#type' => 'textfield',
-		'#title' => t('Outgoing from email address'),
-		'#description' => t('Email address to be display in the from field of all outgoing messages'),
+		'#title' => t('MSCD Literature Survey Last date'),
+		'#description' => t('For eg: 2022-02-28 23:59:59.0, enter in this format'),
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('hackathon_submission_from_email', '')
-	);*/
+		'#default_value' => variable_get('mscd_literature_report_last_date', '')
+	);
 	$form['extensions']['reference_circuit'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Allowed file extensions for uploading reference circuit file'),
@@ -101,10 +101,10 @@ function hackathon_submission_settings_form_validate($form, &$form_state)
 }
 function hackathon_submission_settings_form_submit($form, &$form_state)
 {
-	/*variable_set('hackathon_submission_bcc_emails', $form_state['values']['bcc_emails']);
-	variable_set('hackathon_submission_cc_emails', $form_state['values']['cc_emails']);
-	variable_set('hackathon_submission_from_email', $form_state['values']['from_email']);
-	*/variable_set('reference_circuit_extensions', $form_state['values']['reference_circuit']);
+	variable_set('mscd_literature_report_extensions', $form_state['values']['mscd_literature_report_extensions']);
+	variable_set('mscd_literature_report_start_date', $form_state['values']['mscd_literature_report_start_date']);
+	variable_set('mscd_literature_report_last_date', $form_state['values']['mscd_literature_report_last_date']);
+	variable_set('reference_circuit_extensions', $form_state['values']['reference_circuit']);
 	variable_set('reference_waveform_extensions', $form_state['values']['reference_waveform']);
 	variable_set('main_netlist_file_extensions', $form_state['values']['main_netlist']);
 	variable_set('subcircuit_file_extensions', $form_state['values']['sub_circuit_file']);
