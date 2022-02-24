@@ -875,7 +875,7 @@ function view_mscd_literature_report_submission_form($form, $form_state){
     $form['participant_email'] = array(
         '#type' => 'item',
         '#title' => t('Email'),
-        '#markup' => $user->mail,
+        '#markup' => $submission_data->mail,
     );
     $form['institute'] = array(
         '#type' => 'item',
