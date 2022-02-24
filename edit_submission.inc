@@ -659,7 +659,6 @@ function edit_mscd_literature_report_submission_form($form, $form_state, $no_js_
     $form['participant_name'] = array(
         '#title' => t('Participant Name'),
         '#type' => 'textfield',
-        '#disabled' => TRUE,
         '#size' => 70,
         '#maxlength' => 70,
         '#default_value' => $submission_data->participant_name
@@ -674,7 +673,6 @@ function edit_mscd_literature_report_submission_form($form, $form_state, $no_js_
     $form['institute'] = array(
         '#type' => 'textfield',
         '#title' => t('Name of the college/institute'),
-        '#disabled' => TRUE,
         '#size' => 70,
         '#maxlength' => 70,
         '#required' => TRUE,
@@ -715,6 +713,7 @@ function edit_mscd_literature_report_submission_form($form, $form_state, $no_js_
     $form['reference_files']['literature_report'] = array(
         '#type' => 'file',
         '#size' => 48,
+        '#title' => t('Click <a href= "https://static.fossee.in/esim/resources/Literature-survey.pdf" target="_blank">here</a> to view the template of the file.'),
         '#upload_validators' => array(
                 'file_validate_extensions' => array(variable_get('mscd_literature_report_extensions', '')),
                 // Pass the maximum file size in bytes
@@ -778,10 +777,14 @@ function edit_mscd_literature_report_submission_form_submit($form, $form_state){
     $v = $form_state['values'];
     $root_path = mscd_hackathon_submission_files_path();
     $query = "UPDATE mixed_signal_marathon_literature_survey SET 
+                participant_name = :participant_name,
+                institute = :institute,
                 circuit_name = :circuit_name,
                 circuit_type=:circuit_type
                 WHERE id=:submission_id";
     $args = array(
+        ":participant_name" => $v['participant_name'],
+        ":institute" => $v['institute'],
         ":circuit_name" => $v['circuit_name'],
         ":circuit_type" => $v['circuit_type'],
         ":submission_id" => $submission_id
