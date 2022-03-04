@@ -2091,7 +2091,7 @@ function edit_mscd_final_submission_form($form, $form_state, $no_js_use = FALSE)
     $project_files_data = $query->execute()->fetchObject();
     if(!$project_files_data){
         drupal_set_message('We have not yet received your project files');
-        drupal_goto('hackathon-submission/add/project-files');
+        drupal_goto('mixed-signal-design-marathon/add/final-submission');
     }
 
     $form = array();
@@ -2133,7 +2133,7 @@ $existing_uploaded_F_file = default_value_for_uploaded_mscd_final_submission("F"
     }
     $form['edit_files']['final_report_pdf'] = array(
         '#type' => 'file',
-        //'#title' => t('Upload circuit diagram'),
+        '#title' => t('Edit Final report. <br>Click <a href= "https://static.fossee.in/esim/resources/Final-report.pdf" target="_blank">here</a> to view the template of the file.'),
         '#size' => 48,
         '#description' => t('Upload filenames with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File :</span> ') . $existing_uploaded_F_file->filename . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('mscd_final_report_extensions', '') . '</span>'
     );
@@ -2145,7 +2145,7 @@ $existing_uploaded_F_file = default_value_for_uploaded_mscd_final_submission("F"
     }
     $form['edit_files']['project_files'] = array(
         '#type' => 'file',
-        //'#title' => t('Edit Subcircuit file'),
+        '#title' => t('Edit project files. <br>Click <a href= "https://static.fossee.in/esim/resources/Counter_project_template.zip" target="_blank">here</a> to view the template of the file.'),
         '#size' => 48,
         '#description' => t('Upload filenames with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File :</span> ') . $existing_uploaded_P_file->filename . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('mscd_project_files_extensions', '') . '</span>'
     );
@@ -2247,7 +2247,25 @@ function edit_mscd_final_submission_form_submit($form, $form_state){
                 case 'F':
                     if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
                     {
-                         drupal_set_message(t("Error uploading file. File !filename already exists.", array('!filename' => $_FILES['files']['name'][$file_form_name])), 'error');
+                        move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
+                        $query = "UPDATE mixed_signal_marathon_final_submission_files set 
+                         filename = :filename, 
+                         filepath = :filepath,
+                         filemime = :filemime,
+                         filesize = :filesize
+                         WHERE literature_survey_id = :literature_survey_id and filetype = :filetype";
+                            $args = array(
+                                ":filename" => $_FILES['files']['name'][$file_form_name],
+                                ":filepath" => $dest_path . $_FILES['files']['name'][$file_form_name],
+                                ":filemime" => mime_content_type($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]),
+                                ":filesize" => $_FILES['files']['size'][$file_form_name],
+                                ":literature_survey_id" => $literature_survey_id,
+                                "filetype" => $file_type
+                            );
+                        $updateresult = db_query($query, $args);
+                        drupal_set_message(t("File !filename already exists hence overwirtten the exisitng file ", array(
+                            '!filename' => $_FILES['files']['name'][$file_form_name]
+                        )), 'status');
                         //unlink($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
                     } //file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
                     /* uploading file */
@@ -2286,7 +2304,25 @@ function edit_mscd_final_submission_form_submit($form, $form_state){
                 case 'P':
                     if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]))
                     {
-                         drupal_set_message(t("Error uploading file. File !filename already exists.", array('!filename' => $_FILES['files']['name'][$file_form_name])), 'error');
+                        move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
+                        $query = "UPDATE mixed_signal_marathon_final_submission_files set 
+                         filename = :filename, 
+                         filepath = :filepath,
+                         filemime = :filemime,
+                         filesize = :filesize
+                         WHERE literature_survey_id = :literature_survey_id and filetype = :filetype";
+                            $args = array(
+                                ":filename" => $_FILES['files']['name'][$file_form_name],
+                                ":filepath" => $dest_path . $_FILES['files']['name'][$file_form_name],
+                                ":filemime" => mime_content_type($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]),
+                                ":filesize" => $_FILES['files']['size'][$file_form_name],
+                                ":literature_survey_id" => $literature_survey_id,
+                                "filetype" => $file_type
+                            );
+                        $updateresult = db_query($query, $args);
+                        drupal_set_message(t("File !filename already exists hence overwirtten the exisitng file ", array(
+                            '!filename' => $_FILES['files']['name'][$file_form_name]
+                        )), 'status');
                         //unlink($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]);
                     } //file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
                     /* uploading file */
