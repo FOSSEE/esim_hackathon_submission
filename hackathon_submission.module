@@ -244,6 +244,30 @@ function hackathon_submission_menu()
         "type" => MENU_CALLBACK,
         'file' => 'add_submission.inc'
     );
+    $items["mixed-signal-design-marathon/add/final-submission"] = array(
+        "title" => "CSMD Final submission",
+        "page callback" => 'add_mscd_final_report_submission',
+        /*'page arguments' => array(
+            'add_literature_report_submission'
+        ),*/
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
+    $items["mixed-signal-design-marathon/edit/final-submission"] = array(
+        "title" => "Edit CSMD Final Submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_mscd_final_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
     $items["mixed-signal-design-marathon/proposed"] = array(
         "title" => "Mixed Signal Design  Marathon - List of my submissions",
         "page callback" => "mscd_submission_display_my_submissions",
@@ -275,10 +299,22 @@ function hackathon_submission_menu()
         ),
         "type" => MENU_CALLBACK,
         'file' => 'edit_submission.inc'
+    );  
+    $items["mixed-signal-design-marathon/view/final-submission"] = array(
+        "title" => "View Mixed Signal Marathon Literature report",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'view_mscd_final_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
     );    
     $items["mixed-signal-design-marathon/all-submissions"] = array(
         "title" => "List of all MSCD submissions",
-        "page callback" => "mscd_display_literature_submissions",
+        "page callback" => "mscd_display_final_submissions",
         "access arguments" => array(
             "manage hackathon_submission"
         ),
@@ -292,10 +328,28 @@ function hackathon_submission_menu()
         'type' => MENU_LOCAL_TASK,
         'weight' => 1
     );
+    $items["mixed-signal-design-marathon/all-submissions/final-submissions"] = array(
+        "title" => "List of all MSCD Final submissions",
+        "page callback" => "mscd_display_final_submissions",
+        "access arguments" => array(
+            "manage hackathon_submission"
+        ),
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => 0
+    );
     $items['mixed-signal-design-marathon/download/literature-report'] = array(
         'title' => 'Download MSCD Literature Report',
         'description' => 'Download MSCD Literature Report', 
         'page callback' => 'mscd_download_literature_report',
+        'access arguments' => array("add hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        'file' => 'download.inc'
+        
+    );
+    $items['mixed-signal-design-marathon/download/final-submission'] = array(
+        'title' => 'Download MSCD FInal Submission',
+        'description' => 'Download MSCD FInal Submission', 
+        'page callback' => 'mscd_download_final_submission',
         'access arguments' => array("add hackathon_submission"),
         'type' => MENU_CALLBACK,
         'file' => 'download.inc'
@@ -1366,11 +1420,10 @@ function mscd_submission_display_my_submissions()
         drupal_goto('user/login', array('query' => drupal_get_destination()));
         return $msg;
     }
-    //$output = "<p>Final Submission</p>";
+    $output = "";
     $final_submission_rows = array();
     $query = db_select('mixed_signal_marathon_literature_survey');
     $query->fields('mixed_signal_marathon_literature_survey');
-    //$query->condition('approval_status', 2);
     $query->condition('uid',$user->uid);
     $query->orderBy('id', 'DESC');
     $my_proposals_q = $query->execute();
@@ -1379,23 +1432,54 @@ function mscd_submission_display_my_submissions()
         drupal_set_message('We have not received your submission', 'error');
         drupal_goto('');
     }
+    $query = db_select('mixed_signal_marathon_final_submission');
+    $query->fields('mixed_signal_marathon_final_submission');
+    $query->condition('uid',$user->uid);
+    $query->condition('literature_survey_id', $my_proposals_data->id);
+    $query->orderBy('id', 'DESC');
+    $final_submission_q = $query->execute();
+    $final_submission_data = $final_submission_q->fetchObject();
+    $today = date("Y-m-d H:i:s");
+    $final_submission_last_date = variable_get('mscd_final_submission_last_date', '');
+    if($today > $final_submission_last_date){
+        $final_submission_action =   l('View', 'mixed-signal-design-marathon/view/final-submission/' . $my_proposals_data->id);  
+       // $creation_date = date('d-m-Y', $final_submission_data->creation_date);
+    }
+    else{
+        if(!$final_submission_data){
+            $final_submission_action =   l('Add Final Submission', 'mixed-signal-design-marathon/add/final-submission');
+            //$creation_date = "Final Submission not received";
+        }
+        else{
+            $final_submission_action =  l('View', 'mixed-signal-design-marathon/view/final-submission/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-design-marathon/edit/final-submission/' . $my_proposals_data->id);
+           // $creation_date = date('d-m-Y', $final_submission_data->creation_date);
+        }
+    } 
     
-    $output = "<p>Literature Survey</p>";
+    //$output .= "<p>Literature Survey</p>";
     $my_proposal_rows = array();
     $last_date = variable_get('mscd_literature_report_last_date', '');
     $today = date("Y-m-d H:i:s");
     //var_dump($submission_id);die;
     if($today > $last_date){
-        $action = l('View', 'mixed-signal-design-marathon/view/literature-report/' . $my_proposals_data->id);
+        $literature_survey_action = l('View', 'mixed-signal-design-marathon/view/literature-report/' . $my_proposals_data->id);
     }
     else{
-        $action = l('View', 'mixed-signal-design-marathon/view/literature-report/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-design-marathon/edit/literature-report/' . $my_proposals_data->id);
+        $literature_survey_action = l('View', 'mixed-signal-design-marathon/view/literature-report/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-design-marathon/edit/literature-report/' . $my_proposals_data->id);
+    }
+    if(!$final_submission_data->creation_date){
+        $final_submission_date = 'Not yet uploaded';
+    }
+    else{
+        $final_submission_date = date('d-m-Y', $final_submission_data->creation_date);
     }
     $my_proposal_rows[$my_proposals_data->id] = array(
         date('d-m-Y', $my_proposals_data->creation_date),
+        $final_submission_date,
         l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
         $my_proposals_data->circuit_name,
-        $action
+        $literature_survey_action,
+        $final_submission_action
     );
     /* check if there are any pending proposals */
     if (!$my_proposal_rows)
@@ -1404,10 +1488,12 @@ function mscd_submission_display_my_submissions()
         return '';
     } //!$pending_rows
     $my_proposal_header = array(
-        'Date of Submission',
+        'Literature Survey',
+        'Final Submission',
         'Name',
         'Circuit Name',
-        ''
+        'Literature Survey',
+        'Final Submission'
     );
     //$output = theme_table($pending_header, $pending_rows);
     $output .= theme('table', array(
@@ -1432,19 +1518,17 @@ function mscd_display_literature_submissions()
     $my_submission_rows = array();
     $query = db_select('mixed_signal_marathon_literature_survey');
     $query->fields('mixed_signal_marathon_literature_survey');
-    //$query->condition('approval_status', 2);
-    //$query->condition('uid',$user->uid);
     $query->orderBy('id', 'DESC');
     $my_submissions_q = $query->execute();
     $output = "<p>Total number of submissions: " . $my_submissions_q->rowCount() . "</p><p>Click <a href='download-emails'>here</a> to download the Email IDs of the participants";
     while ($my_submissions_data = $my_submissions_q->fetchObject())
     {
-        $action =   l('View Literature Survey Report', 'mixed-signal-design-marathon/view/literature-report/' . $my_submissions_data->id);  
+        $literature_survey_action =   l('View', 'mixed-signal-design-marathon/view/literature-report/' . $my_submissions_data->id);  
         $my_submission_rows[$my_submissions_data->id] = array(
             date('d-m-Y', $my_submissions_data->creation_date),
             l($my_submissions_data->participant_name, 'user/' . $my_submissions_data->uid),
             $my_submissions_data->circuit_name,
-            $action
+            $literature_survey_action,
         );
     } //$pending_data = $pending_q->fetchObject()
     /* check if there are any pending submissions */
@@ -1454,10 +1538,62 @@ function mscd_display_literature_submissions()
         return '';
     } //!$pending_rows
     $my_submission_header = array(
+        'Literature Survey',
+        'Name',
+        'Circuit Name',
+        'Literature Survey',
+        );
+    //$output = theme_table($pending_header, $pending_rows);
+    $output .= theme('table', array(
+        'header' => $my_submission_header,
+        'rows' => $my_submission_rows
+    ));
+    return $output;
+}
+function mscd_display_final_submissions()
+{
+    global $user;
+    /* get pending submissions to be approved */
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to login on this website to view all submissions. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('/pssp');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    }
+    $my_submission_rows = array();
+    $query = db_select('mixed_signal_marathon_final_submission');
+    $query->fields('mixed_signal_marathon_final_submission');
+    $query->orderBy('id', 'DESC');
+    $my_submissions_q = $query->execute();
+    $output = "<p>Total number of submissions: " . $my_submissions_q->rowCount();
+    while ($my_submissions_data = $my_submissions_q->fetchObject())
+    {
+        $query = db_select('mixed_signal_marathon_literature_survey');
+        $query->fields('mixed_signal_marathon_literature_survey');
+        $query->condition('id',$my_submissions_data->literature_survey_id);
+        $query->orderBy('id', 'DESC');
+        $final_submissions_q = $query->execute();
+        $final_submission_data = $final_submissions_q->fetchObject();
+        $action =  l('View', 'mixed-signal-design-marathon/view/final-submission/' . $final_submission_data->id);  
+        $my_submission_rows[$my_submissions_data->id] = array(
+            date('d-m-Y', $my_submissions_data->creation_date),
+            l($final_submission_data->participant_name, 'user/' . $final_submission_data->uid),
+            $final_submission_data->circuit_name,
+            $action
+        );
+    } //$pending_data = $pending_q->fetchObject()
+    /* check if there are any pending submissions */
+    if (!$my_submission_rows)
+    {
+        drupal_set_message(t('There are no active submissions'), 'status');
+        return '';
+    } //!$pending_rows
+    $my_submission_header = array(
         'Date of Submission',
         'Name',
         'Circuit Name',
-        ''
+        'Final Submission'
     );
     //$output = theme_table($pending_header, $pending_rows);
     $output .= theme('table', array(

@@ -29,6 +29,42 @@ function hackathon_submission_settings_form($form, $form_state)
 		'#required' => TRUE,
 		'#default_value' => variable_get('mscd_literature_report_last_date', '')
 	);
+	$form['extensions']['mscd_final_report_extensions'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Allowed file extensions for uploading MSCD Final report'),
+		'#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('mscd_final_report_extensions', '')
+	);
+	$form['extensions']['mscd_project_files_extensions'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Allowed file extensions for uploading MSCD Project Files'),
+		'#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('mscd_project_files_extensions', '')
+	);
+	$form['extensions']['mscd_final_submission_start_date'] = array(
+		'#type' => 'textfield',
+		'#title' => t('MSCD Final start date'),
+		'#description' => t('For eg: 2022-02-28 23:59:59.0, enter in this format'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('mscd_final_submission_start_date', '')
+	);
+	$form['extensions']['mscd_final_submission_last_date'] = array(
+		'#type' => 'textfield',
+		'#title' => t('MSCD Final Submission Last date'),
+		'#description' => t('For eg: 2022-02-28 23:59:59.0, enter in this format'),
+		'#size' => 50,
+		'#maxlength' => 255,
+		'#required' => TRUE,
+		'#default_value' => variable_get('mscd_final_submission_last_date', '')
+	);
 	$form['extensions']['reference_circuit'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Allowed file extensions for uploading reference circuit file'),
@@ -104,6 +140,10 @@ function hackathon_submission_settings_form_submit($form, &$form_state)
 	variable_set('mscd_literature_report_extensions', $form_state['values']['mscd_literature_report_extensions']);
 	variable_set('mscd_literature_report_start_date', $form_state['values']['mscd_literature_report_start_date']);
 	variable_set('mscd_literature_report_last_date', $form_state['values']['mscd_literature_report_last_date']);
+	variable_set('mscd_final_report_extensions', $form_state['values']['mscd_final_report_extensions']);
+	variable_set('mscd_project_files_extensions', $form_state['values']['mscd_project_files_extensions']);
+	variable_set('mscd_final_submission_start_date', $form_state['values']['mscd_final_submission_start_date']);
+	variable_set('mscd_final_submission_last_date', $form_state['values']['mscd_final_submission_last_date']);
 	variable_set('reference_circuit_extensions', $form_state['values']['reference_circuit']);
 	variable_set('reference_waveform_extensions', $form_state['values']['reference_waveform']);
 	variable_set('main_netlist_file_extensions', $form_state['values']['main_netlist']);
