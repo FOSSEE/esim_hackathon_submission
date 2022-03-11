@@ -2117,7 +2117,8 @@ function edit_mscd_final_submission_form($form, $form_state, $no_js_use = FALSE)
         '#size' => 255,
         '#maxlength' => 255,
         '#default_value' => $project_files_data->github_repo_link,
-        '#required' => TRUE
+        '#required' => TRUE,
+        '#disabled' => TRUE
     );
     $form['edit_files'] = array(
         '#type' => 'fieldset',
@@ -2133,6 +2134,7 @@ $existing_uploaded_F_file = default_value_for_uploaded_mscd_final_submission("F"
     }
     $form['edit_files']['final_report_pdf'] = array(
         '#type' => 'file',
+        '#disabled' => TRUE,
         '#title' => t('Edit Final report. <br>Click <a href= "https://static.fossee.in/esim/resources/Final-report.pdf" target="_blank">here</a> to view the template of the file.'),
         '#size' => 48,
         '#description' => t('Upload filenames with allowed extensions only. No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File :</span> ') . $existing_uploaded_F_file->filename . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('mscd_final_report_extensions', '') . '</span>'
@@ -2161,9 +2163,9 @@ $existing_uploaded_F_file = default_value_for_uploaded_mscd_final_submission("F"
 }
 
 function edit_mscd_final_submission_form_validate($form, $form_state){
-    if(!preg_match("/^(https\:\/\/github.com\/)/", $form_state['values']['github_repo_link'])){
+    /*if(!preg_match("/^(https\:\/\/github.com\/)/", $form_state['values']['github_repo_link'])){
         form_set_error('github_repo_link', t('Enter link to GitHub repository'));
-    }
+    }*/
     if (isset($_FILES['files']))
     {
         /* check for valid filename extensions */
