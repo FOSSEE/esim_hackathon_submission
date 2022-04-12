@@ -977,7 +977,6 @@ function view_mscd_final_submission_form($form, $form_state){
     return $form;
 }
 
-
 function download_mscd_final_submission_form($form, $form_state){
      global $user;
     $submission_id = arg(3);
@@ -1015,6 +1014,11 @@ function download_mscd_final_submission_form($form, $form_state){
         '#title' => t('Circuit Name'),
         '#type' => 'item',
         '#markup' => $literature_submission_data->circuit_name
+    );
+    $form['github_repo_link'] = array(
+        '#type' => 'item',
+        '#title' => t('Link to the GitHub repository'),
+        '#markup' => $final_submission_data->github_repo_link
     );
     $form['reference_files']['final_report'] = array(
         '#type' => 'item',

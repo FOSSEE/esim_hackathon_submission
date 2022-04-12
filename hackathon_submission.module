@@ -1635,12 +1635,22 @@ function mscd_hackathon_submission_download_completed_circuit()
 
     if ($result->rowCount() == 0)
     {
-        $output .= "FOSSEE Project in collaboration with VLSI System Design (VSD) Corp. Pvt. Ltd and the Ministry of Education, Govt. of India conducted a 2-weeks high intensity eSim Mixed Signal Circuit Design and Simulation Marathon. Close to 3000+ students from all over India participated in this Marathon and close to 200+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits. More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";;
+        $output .= "FOSSEE, IIT Bombay, along with VLSI System Design Corp. Pvt. Ltd and Redwood EDA conducted a 3-weeks
+high intensity eSim Mixed Signal Circuit Design and Simulation Marathon. Close
+to 1700+ students from all over India participated in this Marathon and close
+to 60+ students completed this marathon with brilliant circuit design ideas.
+The following participants have successfully completed designing the circuits.
+More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";;
 
     } //$result->rowCount() == 0
     else
     {
-        $output .= "FOSSEE Project in collaboration with VLSI System Design (VSD) Corp. Pvt. Ltd and the Ministry of Education, Govt. of India conducted a 2-weeks high intensity eSim Mixed Signal Circuit Design and Simulation Marathon. Close to 3000+ students from all over India participated in this Marathon and close to 200+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits. More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";;
+        $output .= "FOSSEE, IIT Bombay, along with VLSI System Design Corp. Pvt. Ltd and Redwood EDA conducted a 3-weeks
+                    high intensity eSim Mixed Signal Circuit Design and Simulation Marathon. Close
+to 1700+ students from all over India participated in this Marathon and close
+to 60+ students completed this marathon with brilliant circuit design ideas.
+The following participants have successfully completed designing the circuits.
+More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";;
         $preference_rows = array();
         $i = $result->rowCount();
 
@@ -1656,7 +1666,7 @@ function mscd_hackathon_submission_download_completed_circuit()
         $my_submission_rows[$my_submissions_data->id] = 
         array(
             $i,
-            l($final_submission_data->circuit_name, 'mixed-signal-design-marathon/download/final-submission/' . $my_submissions_data->literature_survey_id),
+            l($final_submission_data->circuit_name, 'mixed-signal-design-marathon/download/circuits/' . $final_submission_data->id),
             $final_submission_data->participant_name,
             $final_submission_data->institute
             //$action
