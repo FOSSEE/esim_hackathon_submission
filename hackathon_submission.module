@@ -9,7 +9,7 @@ function hackathon_submission_permission()
             "title" => t("Add/edit hackathon_submission"),
             "description" => t("Allows users to add/edit submission.")
         ),
-        "access hackathon_submission" => array(
+    "access hackathon_submission" => array(
             "title" => t("Access hackathon_submission"),
             "description" => t("Allows users to view converted.")
         ),
@@ -355,6 +355,27 @@ function hackathon_submission_menu()
         'file' => 'download.inc'
         
     );
+    $items['mixed-signal-design-marathon/download/completed-circuit'] = array(
+        'title' => 'Download Completed Circuit',
+        'description' => 'Download Completed Circuit', 
+        'page callback' => 'mscd_hackathon_submission_download_completed_circuit',
+        'access arguments' => array(
+            "download completed circuit"
+            ),
+        'type' => MENU_CALLBACK,
+    );
+    $items["mixed-signal-design-marathon/download/circuits"] = array(
+        "title" => "Download Mixed Signal Marathon Completed Circuit",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'download_mscd_final_submission_form'
+        ),
+        'access arguments' => array(
+            "download completed circuit"
+            ),
+        'type' => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
+    ); 
     $items["mixed-signal-design-marathon/download-emails"] = array(
         "title" => "Download MSCD participants emails",
         "page callback" => "mscd_download_emails",
@@ -1602,4 +1623,76 @@ function mscd_display_final_submissions()
         'rows' => $my_submission_rows
     ));
     return $output;
+}
+
+function mscd_hackathon_submission_download_completed_circuit()
+{
+    $output = "";
+    $query = db_select('mixed_signal_marathon_final_submission');
+    $query->fields('mixed_signal_marathon_final_submission');
+    $query->condition('approval_status', 3);
+    $query->orderBy('id', 'DESC');
+    //$query->condition('is_completed', 1);
+    $result = $query->execute();
+
+    if ($result->rowCount() == 0)
+    {
+        $output .= "FOSSEE, IIT Bombay, along with VLSI System Design Corp. Pvt. Ltd and Redwood EDA conducted a 3-weeks
+high intensity eSim Mixed Signal Circuit Design and Simulation Marathon. Close
+to 1700+ students from all over India participated in this Marathon and close
+to 60+ students completed this marathon with brilliant circuit design ideas.
+The following participants have successfully completed designing the circuits.
+More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";;
+
+    } //$result->rowCount() == 0
+    else
+    {
+        $output .= "FOSSEE, IIT Bombay, along with VLSI System Design Corp. Pvt. Ltd and Redwood EDA conducted a 3-weeks
+                    high intensity eSim Mixed Signal Circuit Design and Simulation Marathon. Close
+to 1700+ students from all over India participated in this Marathon and close
+to 60+ students completed this marathon with brilliant circuit design ideas.
+The following participants have successfully completed designing the circuits.
+More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";;
+        $preference_rows = array();
+        $i = $result->rowCount();
+
+        while ($my_submissions_data = $result->fetchObject())
+    {
+        $query = db_select('mixed_signal_marathon_literature_survey');
+        $query->fields('mixed_signal_marathon_literature_survey');
+        $query->condition('id',$my_submissions_data->literature_survey_id);
+        $query->orderBy('id', 'DESC');
+        $final_submissions_q = $query->execute();
+        $final_submission_data = $final_submissions_q->fetchObject();
+        //$action =  l('View', 'mixed-signal-design-marathon/view/final-submission/' . $final_submission_data->id);  
+        $my_submission_rows[$my_submissions_data->id] = 
+        array(
+            $i,
+            l($final_submission_data->circuit_name, 'mixed-signal-design-marathon/download/circuits/' . $final_submission_data->id),
+            $final_submission_data->participant_name,
+            $final_submission_data->institute
+            //$action
+        );
+        $i--;
+    } //$pending_data = $pending_q->fetchObject()
+    /* check if there are any pending submissions */
+    if (!$my_submission_rows)
+    {
+        drupal_set_message(t('There are no active submissions'), 'status');
+        return '';
+    } //!$pending_rows
+    $my_submission_header = array(
+        'S.No',
+        'Circuit Name',
+        'Participant Name',
+        'University'
+        //'Final Submission'
+    );
+    //$output = theme_table($pending_header, $pending_rows);
+    $output .= theme('table', array(
+        'header' => $my_submission_header,
+        'rows' => $my_submission_rows
+    ));
+    return $output;
+}
 }
