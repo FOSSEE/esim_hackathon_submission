@@ -100,7 +100,9 @@ function hackathon_submission_menu()
         'title' => 'Download Completed Circuit',
         'description' => 'Download Completed Circuit', 
         'page callback' => 'hackathon_submission_download_completed_circuit',
-        'access arguments' => array("download completed circuit"),
+        'access arguments' => array("
+            download completed circuit"
+        ),
         'type' => MENU_CALLBACK,
         
     );
@@ -108,7 +110,9 @@ function hackathon_submission_menu()
         'title' => 'Download All Files',
         'description' => 'Download All Files', 
         'page callback' => 'create_zip_of_all_files',
-        'access arguments' => array("manage hackathon_submission"),
+        'access arguments' => array(
+            "download completed circuit"
+        ),
         'type' => MENU_CALLBACK,
         
     );
@@ -428,7 +432,7 @@ function hackathon_submission_completed_circuits()
     $result = $query->execute();
     //var_dump($result->rowCount());die;
     $i = 1;
-    $page_content .= "FOSSEE Project in collaboration with VLSI System Design (VSD) Corp. Pvt. Ltd and the Ministry of Education, Govt. of India conducted a 2-weeks high intensity eSim Circuit Design and Simulation Marathon using Skywater 130nm technology, a fully open source process design kit. Close to 3000+ students from all over India participated in this Marathon and close to 200+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits. More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";
+    $page_content .= "FOSSEE Project in collaboration with VLSI System Design (VSD) Corp. Pvt. Ltd and the Ministry of Education, Govt. of India conducted a 2-weeks high intensity eSim Circuit Design and Simulation Marathon using Skywater 130nm technology, a fully open source process design kit. Close to 3000+ students from all over India participated in this Marathon and close to 200+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits. More details about this event can be found here: <a href='https://hackathon.fossee.in/esim/2021' target='_blank'>https://hackathon.fossee.in/esim/2021</a>.<hr>";
     $preference_rows = array();
     while($row_completed_circuits = $result->fetchObject())
     {        
