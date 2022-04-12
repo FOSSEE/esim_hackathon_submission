@@ -980,13 +980,7 @@ function view_mscd_final_submission_form($form, $form_state){
 function download_mscd_final_submission_form($form, $form_state){
      global $user;
     $submission_id = arg(3);
-    if ($user->uid == 0)
-    {
-        $msg = drupal_set_message(t('It is mandatory to log in on this website to edit your submission. If you are new user please create a new account first.'), 'error');
-        //drupal_goto('esim-circuit-simulation-project');
-        drupal_goto('user/login', array('query' => drupal_get_destination()));
-        return $msg;
-    } //$user->uid == 0
+   
     $query = db_select('mixed_signal_marathon_final_submission');
     $query->fields('mixed_signal_marathon_final_submission');
     $query->condition('literature_survey_id', $submission_id);
