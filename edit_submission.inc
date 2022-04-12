@@ -976,3 +976,49 @@ function view_mscd_final_submission_form($form, $form_state){
     }
     return $form;
 }
+
+
+function download_mscd_final_submission_form($form, $form_state){
+     global $user;
+    $submission_id = arg(3);
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to log in on this website to edit your submission. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('esim-circuit-simulation-project');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    } //$user->uid == 0
+    $query = db_select('mixed_signal_marathon_final_submission');
+    $query->fields('mixed_signal_marathon_final_submission');
+    $query->condition('literature_survey_id', $submission_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $final_submission_data = $submission_q->fetchObject();
+    $query = db_select('mixed_signal_marathon_literature_survey');
+    $query->fields('mixed_signal_marathon_literature_survey');
+    $query->condition('id', $final_submission_data->literature_survey_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $literature_submission_data = $submission_q->fetchObject();
+    $form = array();
+    $form['participant_name'] = array(
+        '#title' => t('Participant Name'),
+        '#type' => 'item',
+        '#markup' => $literature_submission_data->participant_name
+    );
+    $form['institute'] = array(
+        '#type' => 'item',
+        '#title' => t('Name of the college/institute'),
+        '#markup' => $literature_submission_data->institute
+    );
+    $form['circuit_name'] = array(
+        '#title' => t('Circuit Name'),
+        '#type' => 'item',
+        '#markup' => $literature_submission_data->circuit_name
+    );
+    $form['reference_files']['final_report'] = array(
+        '#type' => 'item',
+        '#markup' => l('Download Final Report and Project Files', 'mixed-signal-design-marathon/download/final-submission/' . $literature_submission_data->id)
+    );
+    return $form;
+}
