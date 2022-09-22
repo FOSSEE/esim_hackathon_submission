@@ -1084,11 +1084,11 @@ function edit_soc_marathon_literature_report_submission_form($form, $form_state,
         '#type' => 'file',
         '#size' => 48,
         '#title' => t('Click <a href= "https://static.fossee.in/esim/resources/Literature-survey.pdf" target="_blank">here</a> to view the template of the file.'),
-        '#upload_validators' => array(
+        /*'#upload_validators' => array(
                 'file_validate_extensions' => array(variable_get('soc_marathon_literature_report_extensions', '')),
                 // Pass the maximum file size in bytes
                 /*'file_validate_size' => array(5*1024*1024),*/
-              ),
+              ),*/
         '#description' => t('No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File:</span> ') . $report_file . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('soc_marathon_literature_report_extensions', '') . '</span>'
     );
 
@@ -1114,7 +1114,7 @@ function edit_soc_marathon_literature_report_submission_form_validate($form, &$f
             if ($file_name)
             {
                 /* checking file type */
-                /*if (strstr($file_form_name, 'literature_report'))
+                if (strstr($file_form_name, 'literature_report'))
                         $file_type = 'L';
                 $allowed_extensions_str = '';
                 switch ($file_type)
@@ -1127,7 +1127,7 @@ function edit_soc_marathon_literature_report_submission_form_validate($form, &$f
                 $fnames = explode('.', strtolower($_FILES['files']['name'][$file_form_name]));
                 $temp_extension = end($fnames);
                 if (!in_array($temp_extension, $allowed_extensions))
-                    form_set_error($file_form_name, t('Only file with ' . $allowed_extensions_str . ' extensions can be uploaded.'));*/
+                    form_set_error($file_form_name, t('File with ' . $allowed_extensions_str . ' extension only can be uploaded.'));
                 if ($_FILES['files']['size'][$file_form_name] <= 0)
                     form_set_error($file_form_name, t('File size cannot be zero.'));
                 /* check if valid file name */
