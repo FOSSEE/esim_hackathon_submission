@@ -166,6 +166,9 @@ function hackathon_submission_settings_form_validate($form, &$form_state)
 }
 function hackathon_submission_settings_form_submit($form, &$form_state)
 {
+	variable_set('soc_marathon_literature_report_extensions', $form_state['values']['soc_marathon_literature_report_extensions']);
+	variable_set('soc_marathon_literature_report_start_date', $form_state['values']['soc_marathon_literature_report_start_date']);
+	variable_set('soc_marathon_literature_report_last_date', $form_state['values']['soc_marathon_literature_report_last_date']);
 	variable_set('mscd_literature_report_extensions', $form_state['values']['mscd_literature_report_extensions']);
 	variable_set('mscd_literature_report_start_date', $form_state['values']['mscd_literature_report_start_date']);
 	variable_set('mscd_literature_report_last_date', $form_state['values']['mscd_literature_report_last_date']);
