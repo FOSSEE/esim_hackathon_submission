@@ -1087,7 +1087,7 @@ function edit_soc_marathon_literature_report_submission_form($form, $form_state,
         /*'#upload_validators' => array(
                 'file_validate_extensions' => array(variable_get('soc_marathon_literature_report_extensions', '')),
                 // Pass the maximum file size in bytes
-                /*'file_validate_size' => array(5*1024*1024),*/
+                /*'file_validate_size' => array(5*1024*1024),
               ),*/
         '#description' => t('No spaces or any special characters allowed in filename.') . '<br />' . t('<span style="color:red;">Current File:</span> ') . $report_file . '<br />' . t('<span style="color:red;">Allowed file extensions: ') . variable_get('soc_marathon_literature_report_extensions', '') . '</span>'
     );
