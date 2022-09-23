@@ -1,4 +1,31 @@
 <?php
+function soc_marathon_download_literature_report()
+{
+    global $user;
+    $submission_id = arg(3);
+    $root_path = soc_marathon_hackathon_submission_files_path();
+    //var_dump($root_path);die;
+    $query = db_select('mixed_signal_soc_marathon_literature_survey');
+    $query->fields('mixed_signal_soc_marathon_literature_survey');
+    $query->condition('id', $submission_id);
+    $submission_q = $query->execute();
+    $submission_data = $submission_q->fetchObject();
+    $directory_path = $submission_data->directory_name . '/';
+    //var_dump($root_path . $directory_path . $submission_data->report_file);die;
+    if($root_path . $directory_path . $submission_data->report_file){
+          header('Content-Type: application/pdf');
+            header('Content-disposition: attachment; filename=' . $submission_data->report_file );
+            header('Content-Length: ' . filesize($root_path . $directory_path . $submission_data->report_file));
+            ob_clean();
+            readfile($root_path . $directory_path . $submission_data->report_file);
+    }
+    else{
+            //unlink($zip_filename);
+            drupal_set_message("File not found", 'error');
+        drupal_goto('mixed-signal-design-marathon');
+    }
+    
+}
 function mscd_download_literature_report()
 {
     global $user;

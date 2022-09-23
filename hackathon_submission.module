@@ -385,6 +385,60 @@ function hackathon_submission_menu()
         "type" => MENU_CALLBACK,
         'file' => 'download.inc'
     );
+    /******************** Mixed Signal SoC Hackathon *********************************/
+    $items["mixed-signal-soc-design-marathon/add/literature-report"] = array(
+        "title" => "Mixed Signal SoC Design Marathon Submission",
+        "page callback" => 'add_soc_literature_report_submission',
+        /*'page arguments' => array(
+            'add_literature_report_submission'
+        ),*/
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'add_submission.inc'
+    );
+    $items["mixed-signal-soc-design-marathon/proposed"] = array(
+        "title" => "Mixed Signal SoC Design  Marathon - List of my submissions",
+        "page callback" => "soc_marathon_submission_display_my_submissions",
+        "access arguments" => array(
+            "access hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK
+    );
+    $items["mixed-signal-soc-design-marathon/view/literature-report"] = array(
+        "title" => "View Mixed Signal SoC Design Marathon Literature report",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'view_soc_marathon_literature_report_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
+    );
+    $items["mixed-signal-soc-design-marathon/edit/literature-report"] = array(
+        "title" => "Edit Mixed Signal Marathon Literature report",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_soc_marathon_literature_report_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
+    );
+    $items['mixed-signal-soc-design-marathon/download/literature-report'] = array(
+        'title' => 'Download SoC Marathon Literature Report',
+        'description' => 'Download SoC Marathon Literature Report', 
+        'page callback' => 'soc_marathon_download_literature_report',
+        'access arguments' => array("add hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        'file' => 'download.inc'
+        
+    );
     return $items;
 }
 
@@ -412,6 +466,10 @@ function hackathon_submission_upload_path() {
 
 function hackathon_submission_convert_path() {
   return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'hackathon_submission_converts';
+}
+
+function soc_marathon_hackathon_submission_files_path() {
+  return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'esim_uploads/hackathon_submission_uploads/soc_marathon_uploads/';
 }
 
 /*function hackathon_submission_add_form_display()
@@ -1695,4 +1753,98 @@ More details about this event can be found here: <a href='https://hackathon.foss
     ));
     return $output;
 }
+}
+function soc_marathon_submission_display_my_submissions()
+{
+    global $user;
+    /* get pending proposals to be approved */
+    if ($user->uid == 0)
+    {
+        $msg = drupal_set_message(t('It is mandatory to login on this website to view your proposals. If you are new user please create a new account first.'), 'error');
+        //drupal_goto('/pssp');
+        drupal_goto('user/login', array('query' => drupal_get_destination()));
+        return $msg;
+    }
+    $output = "";
+    $final_submission_rows = array();
+    $query = db_select('mixed_signal_soc_marathon_literature_survey');
+    $query->fields('mixed_signal_soc_marathon_literature_survey');
+    $query->condition('uid',$user->uid);
+    $query->orderBy('id', 'DESC');
+    $my_proposals_q = $query->execute();
+    $my_proposals_data = $my_proposals_q->fetchObject();
+    if(!$my_proposals_data){
+        drupal_set_message('We have not received your submission', 'error');
+        drupal_goto('');
+    }
+    /*$query = db_select('mixed_signal_marathon_final_submission');
+    $query->fields('mixed_signal_marathon_final_submission');
+    $query->condition('uid',$user->uid);
+    $query->condition('literature_survey_id', $my_proposals_data->id);
+    $query->orderBy('id', 'DESC');
+    $final_submission_q = $query->execute();
+    $final_submission_data = $final_submission_q->fetchObject();
+    $today = date("Y-m-d H:i:s");
+    $final_submission_last_date = variable_get('mscd_final_submission_last_date', '');
+    if($today > $final_submission_last_date){
+        $final_submission_action =   l('View', 'mixed-signal-design-marathon/view/final-submission/' . $my_proposals_data->id);  
+       // $creation_date = date('d-m-Y', $final_submission_data->creation_date);
+    }
+    else{
+        if(!$final_submission_data){
+            //$final_submission_action =   l('Add Final Submission', 'mixed-signal-design-marathon/add/final-submission');
+            $final_submission_action =   "Closed";
+            //$creation_date = "Final Submission not received";
+        }
+        else{
+            $final_submission_action =  l('View', 'mixed-signal-design-marathon/view/final-submission/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-design-marathon/edit/final-submission/' . $my_proposals_data->id);
+           // $creation_date = date('d-m-Y', $final_submission_data->creation_date);
+        }
+    } */
+    
+    //$output .= "<p>Literature Survey</p>";
+    $my_proposal_rows = array();
+    $last_date = variable_get('soc_marathon_literature_report_last_date', '');
+    $today = date("Y-m-d H:i:s");
+    //var_dump($submission_id);die;
+    if($today > $last_date){
+        $literature_survey_action = l('View', 'mixed-signal-soc-design-marathon/view/literature-report/' . $my_proposals_data->id);
+    }
+    else{
+        $literature_survey_action = l('View', 'mixed-signal-soc-design-marathon/view/literature-report/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-soc-design-marathon/edit/literature-report/' . $my_proposals_data->id);
+    }
+    /*if(!$final_submission_data->creation_date){
+        $final_submission_date = 'Not yet uploaded';
+    }
+    else{
+        $final_submission_date = date('d-m-Y', $final_submission_data->creation_date);
+    }*/
+    $my_proposal_rows[$my_proposals_data->id] = array(
+        date('d-m-Y', $my_proposals_data->creation_date),
+      //  $final_submission_date,
+        l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
+        $my_proposals_data->circuit_name,
+        $literature_survey_action,
+        //$final_submission_action
+    );
+    /* check if there are any pending proposals */
+    if (!$my_proposal_rows)
+    {
+        drupal_set_message(t('You do not have any active submissions. To submit, click ') . l('here', 'hackathon-submission/add/literature-report'), 'status');
+        return '';
+    } //!$pending_rows
+    $my_proposal_header = array(
+        'Literature Survey',
+       // 'Final Submission',
+        'Name',
+        'Circuit Name',
+        'Literature Survey',
+        //'Final Submission'
+    );
+    //$output = theme_table($pending_header, $pending_rows);
+    $output .= theme('table', array(
+        'header' => $my_proposal_header,
+        'rows' => $my_proposal_rows
+    ));
+    return $output;
 }
