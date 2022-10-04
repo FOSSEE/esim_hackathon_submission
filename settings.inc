@@ -30,6 +30,42 @@ function hackathon_submission_settings_form($form, $form_state)
         '#required' => TRUE,
         '#default_value' => variable_get('soc_marathon_literature_report_last_date', '')
     );
+    $form['extensions']['soc_marathon_final_report_extensions'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Allowed file extensions for uploading SoC Design Marathon Final report'),
+        '#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+        '#size' => 50,
+        '#maxlength' => 255,
+        '#required' => TRUE,
+        '#default_value' => variable_get('soc_marathon_final_report_extensions', '')
+    );
+    $form['extensions']['soc_marathon_project_files_extensions'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Allowed file extensions for uploading SoC Design Marathon Project Files'),
+        '#description' => t('A comma separated list WITHOUT SPACE of source file extensions that are permitted to be uploaded on the server'),
+        '#size' => 50,
+        '#maxlength' => 255,
+        '#required' => TRUE,
+        '#default_value' => variable_get('soc_marathon_project_files_extensions', '')
+    );
+    $form['extensions']['soc_marathon_final_submission_start_date'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SoC Design Marathon Final start date'),
+        '#description' => t('For eg: 2022-02-28 23:59:59.0, enter in this format'),
+        '#size' => 50,
+        '#maxlength' => 255,
+        '#required' => TRUE,
+        '#default_value' => variable_get('soc_marathon_final_submission_start_date', '')
+    );
+    $form['extensions']['soc_marathon_final_submission_last_date'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SoC Design Marathon Final Submission Last date'),
+        '#description' => t('For eg: 2022-02-28 23:59:59.0, enter in this format'),
+        '#size' => 50,
+        '#maxlength' => 255,
+        '#required' => TRUE,
+        '#default_value' => variable_get('soc_marathon_final_submission_last_date', '')
+    );
     /************************* Settings for SoC marathon ends *****************************************/
 	$form['extensions']['mscd_literature_report_extensions'] = array(
 		'#type' => 'textfield',
@@ -169,6 +205,10 @@ function hackathon_submission_settings_form_submit($form, &$form_state)
 	variable_set('soc_marathon_literature_report_extensions', $form_state['values']['soc_marathon_literature_report_extensions']);
 	variable_set('soc_marathon_literature_report_start_date', $form_state['values']['soc_marathon_literature_report_start_date']);
 	variable_set('soc_marathon_literature_report_last_date', $form_state['values']['soc_marathon_literature_report_last_date']);
+	variable_set('soc_marathon_final_report_extensions', $form_state['values']['soc_marathon_final_report_extensions']);
+    variable_set('soc_marathon_project_files_extensions', $form_state['values']['soc_marathon_project_files_extensions']);
+    variable_set('soc_marathon_final_submission_start_date', $form_state['values']['soc_marathon_final_submission_start_date']);
+    variable_set('soc_marathon_final_submission_last_date', $form_state['values']['soc_marathon_final_submission_last_date']);
 	variable_set('mscd_literature_report_extensions', $form_state['values']['mscd_literature_report_extensions']);
 	variable_set('mscd_literature_report_start_date', $form_state['values']['mscd_literature_report_start_date']);
 	variable_set('mscd_literature_report_last_date', $form_state['values']['mscd_literature_report_last_date']);
