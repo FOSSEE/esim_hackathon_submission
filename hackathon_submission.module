@@ -1921,8 +1921,8 @@ function soc_marathon_submission_display_my_submissions()
     }
     else{
         if(!$final_submission_data){
-            //$final_submission_action =   l('Add Final Submission', 'mixed-signal-design-marathon/add/final-submission');
-            $final_submission_action =   "Closed";
+            $final_submission_action =   l('Add Final Submission', 'mixed-signal-design-marathon/add/final-submission');
+            //$final_submission_action =   "Closed";
             //$creation_date = "Final Submission not received";
         }
         else{
