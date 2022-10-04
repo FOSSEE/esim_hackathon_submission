@@ -464,6 +464,63 @@ function hackathon_submission_menu()
         "type" => MENU_CALLBACK,
         'file' => 'download.inc'
     );
+    $items["mixed-signal-soc-design-marathon/add/final-submission"] = array(
+        "title" => "Mixed Signal SoC Design Marathon Final submission",
+        "page callback" => 'add_soc_marathon_final_report_submission',
+        /*'page arguments' => array(
+            'add_literature_report_submission'
+        ),*/
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
+    $items["mixed-signal-soc-design-marathon/view/final-submission"] = array(
+        "title" => "View Mixed Signal SoC Marathon Final Submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'view_soc_marathon_final_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'edit_submission.inc'
+    );    
+    $items["mixed-signal-soc-design-marathon/edit/final-submission"] = array(
+        "title" => "Edit Mixed Signal SoC Design Marathon Final Submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_soc_marathone_final_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
+    $items['mixed-signal-soc-design-marathon/download/final-submission'] = array(
+        'title' => 'Download Mixed Signal SoC Design Marathon Final Submission',
+        'description' => 'Download Mixed Signal SoC Design Marathon Final Submission', 
+        'page callback' => 'soc_marathon_download_final_submission',
+        'access arguments' => array("add hackathon_submission"),
+        'type' => MENU_CALLBACK,
+        'file' => 'download.inc'
+        
+    );
+    $items["mixed-signal-soc-design-marathon/edit/final-submission"] = array(
+        "title" => "Edit Mixed Signal SoC Design Marathon Final Submission",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'edit_soc_marathon_final_submission_form'
+        ),
+        "access arguments" => array(
+            "add hackathon_submission"
+        ),
+        "type" => MENU_CALLBACK,
+        'file' => 'final_submission.inc'
+    );
     return $items;
 }
 
@@ -1849,17 +1906,17 @@ function soc_marathon_submission_display_my_submissions()
         drupal_set_message('We have not received your submission', 'error');
         drupal_goto('');
     }
-    /*$query = db_select('mixed_signal_marathon_final_submission');
-    $query->fields('mixed_signal_marathon_final_submission');
+    $query = db_select('mixed_signal_soc_marathon_final_submission');
+    $query->fields('mixed_signal_soc_marathon_final_submission');
     $query->condition('uid',$user->uid);
     $query->condition('literature_survey_id', $my_proposals_data->id);
     $query->orderBy('id', 'DESC');
     $final_submission_q = $query->execute();
     $final_submission_data = $final_submission_q->fetchObject();
     $today = date("Y-m-d H:i:s");
-    $final_submission_last_date = variable_get('mscd_final_submission_last_date', '');
+    $final_submission_last_date = variable_get('soc_marathon_final_submission_last_date', '');
     if($today > $final_submission_last_date){
-        $final_submission_action =   l('View', 'mixed-signal-design-marathon/view/final-submission/' . $my_proposals_data->id);  
+        $final_submission_action =   l('View', 'mixed-signal-soc-design-marathon/view/final-submission/' . $my_proposals_data->id);  
        // $creation_date = date('d-m-Y', $final_submission_data->creation_date);
     }
     else{
@@ -1869,10 +1926,10 @@ function soc_marathon_submission_display_my_submissions()
             //$creation_date = "Final Submission not received";
         }
         else{
-            $final_submission_action =  l('View', 'mixed-signal-design-marathon/view/final-submission/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-design-marathon/edit/final-submission/' . $my_proposals_data->id);
+            $final_submission_action =  l('View', 'mixed-signal-soc-design-marathon/view/final-submission/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-soc-design-marathon/edit/final-submission/' . $my_proposals_data->id);
            // $creation_date = date('d-m-Y', $final_submission_data->creation_date);
         }
-    } */
+    } 
     
     //$output .= "<p>Literature Survey</p>";
     $my_proposal_rows = array();
@@ -1885,19 +1942,19 @@ function soc_marathon_submission_display_my_submissions()
     else{
         $literature_survey_action = l('View', 'mixed-signal-soc-design-marathon/view/literature-report/' . $my_proposals_data->id) . ' | ' . l('Edit', 'mixed-signal-soc-design-marathon/edit/literature-report/' . $my_proposals_data->id);
     }
-    /*if(!$final_submission_data->creation_date){
+    if(!$final_submission_data->creation_date){
         $final_submission_date = 'Not yet uploaded';
     }
     else{
         $final_submission_date = date('d-m-Y', $final_submission_data->creation_date);
-    }*/
+    }
     $my_proposal_rows[$my_proposals_data->id] = array(
         date('d-m-Y', $my_proposals_data->creation_date),
-      //  $final_submission_date,
+        $final_submission_date,
         l($my_proposals_data->participant_name, 'user/' . $my_proposals_data->uid),
         $my_proposals_data->circuit_name,
         $literature_survey_action,
-        //$final_submission_action
+        $final_submission_action
     );
     /* check if there are any pending proposals */
     if (!$my_proposal_rows)
@@ -1907,11 +1964,11 @@ function soc_marathon_submission_display_my_submissions()
     } //!$pending_rows
     $my_proposal_header = array(
         'Literature Survey',
-       // 'Final Submission',
+        'Final Submission',
         'Name',
         'Circuit Name',
         'Literature Survey',
-        //'Final Submission'
+        'Final Submission'
     );
     //$output = theme_table($pending_header, $pending_rows);
     $output .= theme('table', array(
