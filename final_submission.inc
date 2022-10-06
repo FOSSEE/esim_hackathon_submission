@@ -2765,8 +2765,7 @@ function edit_soc_marathon_final_submission_form($form, $form_state, $no_js_use 
         '#size' => 255,
         '#maxlength' => 255,
         '#default_value' => $project_files_data->github_repo_link,
-        '#required' => TRUE,
-        '#disabled' => TRUE
+        '#required' => TRUE
     );
     $form['edit_files'] = array(
         '#type' => 'fieldset',
