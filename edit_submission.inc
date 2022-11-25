@@ -1333,3 +1333,47 @@ function view_soc_marathon_final_submission_form($form, $form_state){
     }
     return $form;
 }
+
+function download_soc_marathon_final_submission_form($form, $form_state){
+     global $user;
+    $submission_id = arg(3);
+   
+    $query = db_select('mixed_signal_soc_marathon_final_submission');
+    $query->fields('mixed_signal_soc_marathon_final_submission');
+    $query->condition('literature_survey_id', $submission_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $final_submission_data = $submission_q->fetchObject();
+    $query = db_select('mixed_signal_soc_marathon_literature_survey');
+    $query->fields('mixed_signal_soc_marathon_literature_survey');
+    $query->condition('id', $final_submission_data->literature_survey_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $literature_submission_data = $submission_q->fetchObject();
+    $form = array();
+    $form['participant_name'] = array(
+        '#title' => t('Participant Name'),
+        '#type' => 'item',
+        '#markup' => $literature_submission_data->participant_name
+    );
+    $form['institute'] = array(
+        '#type' => 'item',
+        '#title' => t('Name of the college/institute'),
+        '#markup' => $literature_submission_data->institute
+    );
+    $form['circuit_name'] = array(
+        '#title' => t('Circuit Name'),
+        '#type' => 'item',
+        '#markup' => $literature_submission_data->circuit_name
+    );
+    $form['github_repo_link'] = array(
+        '#type' => 'item',
+        '#title' => t('Link to the GitHub repository'),
+        '#markup' => $final_submission_data->github_repo_link
+    );
+    $form['reference_files']['final_report'] = array(
+        '#type' => 'item',
+        '#markup' => l('Download Final Report and Project Files', 'mixed-signal-soc-design-marathon/download/final-submission/' . $literature_submission_data->id)
+    );
+    return $form;
+}
