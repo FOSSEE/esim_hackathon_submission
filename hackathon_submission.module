@@ -2072,13 +2072,13 @@ function soc_marathon_download_completed_circuit()
 
     if ($result->rowCount() == 0)
     {
-        $output .= "FOSSEE, IIT Bombay, along with VLSI System Design Corp. Pvt. Ltd conducted a 3-weeks high intensity Mixed Signal SoC design Marathon using eSim & SKY130. Close to 3000 students from all over India participated in this Marathon and close to 100+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits.
+        $output .= "FOSSEE, IIT Bombay, along with Google and VLSI System Design Corp. Pvt. Ltd conducted a 3-weeks high intensity Mixed Signal SoC design Marathon using eSim & SKY130. Close to 3000 students from all over India participated in this Marathon and close to 100+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits.
 More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";
 
     } //$result->rowCount() == 0
     else
     {
-        $output .= "FOSSEE, IIT Bombay, along with VLSI System Design Corp. Pvt. Ltd conducted a 3-weeks high intensity Mixed Signal SoC design Marathon using eSim & SKY130. Close to 3000 students from all over India participated in this Marathon and close to 100+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits.
+        $output .= "FOSSEE, IIT Bombay, along with Google and VLSI System Design Corp. Pvt. Ltd conducted a 3-weeks high intensity Mixed Signal SoC design Marathon using eSim & SKY130. Close to 3000 students from all over India participated in this Marathon and close to 100+ students completed this marathon with brilliant circuit design ideas. The following participants have successfully completed designing the circuits.
 More details about this event can be found here: <a href='https://hackathon.fossee.in/esim' target='_blank'>https://hackathon.fossee.in/esim</a>.<hr>";
         $preference_rows = array();
         $i = $result->rowCount();
