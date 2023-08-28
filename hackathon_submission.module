@@ -47,6 +47,17 @@ function hackathon_submission_menu()
         ),
         "type" => MENU_CALLBACK
     );
+    $items["hackathon/download/completed-circuits"] = array(
+        "title" => "Download Circuit Design and Simulation Marathon using eSim Completed Circuit",
+        "page callback" => 'drupal_get_form',
+        'page arguments' => array(
+            'download_hackathon_final_submission_form'
+        ),
+        'access arguments' => array(
+            "download completed circuit"
+            ),
+        'type' => MENU_CALLBACK,
+    );
     $items["hackathon-submission/all-submissions"] = array(
         "title" => "List of all submissions",
         "page callback" => "hackathon_submission_display_final_submissions",
@@ -96,7 +107,8 @@ function hackathon_submission_menu()
         'type' => MENU_CALLBACK,
         
     );
-    $items['hackathon-submission/download/completed-circuit'] = array(
+
+    $items['hackathon-submission/download/final-submission'] = array(
         'title' => 'Download Completed Circuit',
         'description' => 'Download Completed Circuit', 
         'page callback' => 'hackathon_submission_download_completed_circuit',
@@ -612,7 +624,7 @@ function hackathon_submission_completed_circuits()
             //$approval_date = date("Y", $row->approval_date);
             $preference_rows[] = array(
                 $i,
-                l($row->circuit_name, 'hackathon-submission/download/completed-circuit/' . $row_completed_circuits->literature_survey_id),
+                l($row->circuit_name, 'hackathon/download/completed-circuits/' . $row_completed_circuits->literature_survey_id),
                 wordwrap($row->participant_name, 10, "\n", false),
                 $row->institute,
                 //$approval_date
@@ -634,6 +646,43 @@ function hackathon_submission_completed_circuits()
     return $page_content;
 }
 
+function download_hackathon_final_submission_form($form, $form_state){
+     global $user;
+    $submission_id = arg(3);
+    $query = db_select('hackathon_literature_survey');
+    $query->fields('hackathon_literature_survey');
+    $query->condition('id', $submission_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $literature_submission_data = $submission_q->fetchObject();
+    $query = db_select('hackathon_final_submission');
+    $query->fields('hackathon_final_submission');
+    $query->condition('literature_survey_id', $submission_id);
+    //$query->range(0, 1);
+    $submission_q = $query->execute();
+    $final_submission_data = $submission_q->fetchObject();
+    $form = array();
+    $form['participant_name'] = array(
+        '#title' => t('Participant Name'),
+        '#type' => 'item',
+        '#markup' => $literature_submission_data->participant_name
+    );
+    $form['institute'] = array(
+        '#type' => 'item',
+        '#title' => t('Name of the college/institute'),
+        '#markup' => $literature_submission_data->institute
+    );
+    $form['circuit_name'] = array(
+        '#title' => t('Circuit Name'),
+        '#type' => 'item',
+        '#markup' => $literature_submission_data->circuit_name
+    );
+    $form['reference_files']['final_report'] = array(
+        '#type' => 'item',
+        '#markup' => l('Download Final Report and Project Files', 'hackathon-submission/download/final-submission/' . $literature_submission_data->id)
+    );
+    return $form;
+}
 
 function hackathon_submission_display_my_submissions()
 {
@@ -804,6 +853,8 @@ function hackathon_submission_display_all_submissions()
     ));
     return $output;
 }
+
+
 
 function hackathon_submission_display_final_submissions()
 {
@@ -1047,6 +1098,7 @@ function hackathon_submission_download_completed_circuit()
 {
     global $user;
     $submission_id = arg(3);
+    //var_dump($submission_id);die;
     $root_path = hackathon_submission_files_path();
     //var_dump($root_path);die;
     $query = db_select('hackathon_literature_survey');
@@ -1054,6 +1106,7 @@ function hackathon_submission_download_completed_circuit()
     $query->condition('id', $submission_id);
     $submission_q = $query->execute();
     $submission_data = $submission_q->fetchObject();
+    //var_dump($submission_data);die;
     $directory_path = $submission_data->directory_name . '/';
     $query = db_select('hackathon_final_submission');
     $query->fields('hackathon_final_submission');
